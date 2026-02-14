@@ -108,9 +108,10 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 if (transactionsData) {
                     const mappedTransactions = transactionsData.map((t: any) => ({
                         ...t,
+                        date: new Date(t.date),
                         isShared: t.is_shared,
                         paymentMethod: t.payment_method,
-                        tax: t.tax
+                        type: t.type || 'expense' // Default to expense if null (for old records)
                     }));
                     setTransactions(mappedTransactions);
                 }
@@ -395,7 +396,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 is_shared: transaction.isShared,
                 payment_method: transaction.paymentMethod,
                 tax: transaction.tax ?? 0,
-                trip_id: currentTripId
+                trip_id: currentTripId,
+                type: transaction.type
             };
 
             const { data, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
@@ -500,8 +502,16 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             }
         });
 
-        // Subtract Expenses
+        // Process Transactions (Expenses and Income)
         transactions.forEach(t => {
+            const isIncome = t.type === 'income';
+
+            // Function to apply amount to balance (Income adds, Expense subtracts)
+            const applyAmount = (val: number) => {
+                if (isIncome) balance += val;
+                else balance -= val;
+            };
+
             if (t.isShared) {
                 // Calculate divider based on who existed at the time of transaction
                 const participants = wallets.filter(w =>
@@ -509,13 +519,13 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 );
                 const divider = participants.length > 0 ? participants.length : 1;
 
-                // Only subtract if this wallet is included in division AND existed
+                // Only apply share if this wallet is included in division AND existed
                 if (wallet.includedInDivision && walletExistedAt(wallet, t.date)) {
-                    balance -= (t.amount / divider);
+                    applyAmount(t.amount / divider);
                 }
             } else {
                 if (t.payer === walletId) {
-                    balance -= t.amount;
+                    applyAmount(t.amount);
                 }
             }
         });
@@ -532,7 +542,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             payer: transaction.payer,
             is_shared: transaction.isShared,
             payment_method: transaction.paymentMethod,
-            tax: transaction.tax ?? 0
+            tax: transaction.tax ?? 0,
+            type: transaction.type
         };
 
         const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);

@@ -7,11 +7,12 @@ import type { Category, WalletType, Transaction } from '../types';
 import { clsx } from 'clsx';
 
 interface AddTransactionModalProps {
+    isOpen: boolean;
     onClose: () => void;
     initialData?: Transaction;
 }
 
-const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, initialData }) => {
+const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClose, initialData }) => {
     const { addTransaction, updateTransaction, removeTransaction, wallets, categories, autoSharedCategories, paymentMethods } = useExpenses();
     const { showToast } = useToast();
 
@@ -78,6 +79,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
                 payer,
                 isShared,
                 paymentMethod,
+                type: 'expense' as const,
                 date: initialData ? initialData.date : new Date(),
             };
 
@@ -125,6 +127,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
             (e.target as HTMLInputElement).blur();
         }
     };
+
+    if (!isOpen) return null;
 
     return (
         <>

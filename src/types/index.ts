@@ -29,6 +29,7 @@ export interface Transaction {
     isShared: boolean;
     paymentMethod?: string; // e.g., 'Credit', 'Debit', 'Cash', 'Pix'
     tax?: number;
+    type: 'expense' | 'income';
     trip_id?: string;
 }
 

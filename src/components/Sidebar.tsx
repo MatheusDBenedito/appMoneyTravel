@@ -1,6 +1,5 @@
-
 import { useExpenses } from '../context/ExpenseContext'; // Import context
-import { Home, DollarSign, Settings, Wallet, PieChart, Map } from 'lucide-react';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
 
@@ -9,9 +8,10 @@ interface SidebarProps {
     activeTab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports';
     setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports') => void;
     className?: string;
+    onOpenReturn: () => void;
 }
 
-export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, className = '', onOpenReturn }: SidebarProps) {
     const { trips, currentTripId, switchTrip } = useExpenses(); // Get trip data
     const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
 
@@ -69,26 +69,27 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
-                {menuItems.map((item) => {
+                {menuItems.map((item) => (
+                    <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
+                            ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                            }`}
+                    >
+                        <item.icon size={20} />
+                        <span>{item.label}</span>
+                    </button>
+                ))}
 
-                    // Since history is a sub-view of dashboard in mobile, let's treat it distinct here if we want a sidebar item for it, 
-                    // OR keep it consistent with mobile logic.
-                    // Let's stick to the props passed: activeTab.
-
-                    return (
-                        <button
-                            key={item.id}
-                            onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
-                                ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
-                        >
-                            <item.icon size={20} />
-                            <span>{item.label}</span>
-                        </button>
-                    );
-                })}
+                <button
+                    onClick={onOpenReturn}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-green-600 hover:bg-green-50 hover:text-green-700 font-medium mt-4 border border-green-100"
+                >
+                    <ArrowRightLeft size={20} />
+                    <span>Devolução</span>
+                </button>
             </nav>
 
             <div className="p-4 border-t border-gray-100">

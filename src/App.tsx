@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useExpenses } from './context/ExpenseContext';
-import { Plus, Settings, Home, DollarSign } from 'lucide-react';
+import { ExpenseProvider, useExpenses } from './context/ExpenseContext';
+import { Plus, ArrowRightLeft, Settings, PieChart, Wallet, Home, DollarSign } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 // Components
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
+import AddReturnModal from './components/AddReturnModal';
 import ExchangeForm from './components/ExchangeForm';
 import PeopleManager from './components/PeopleManager';
 import CategoryManager from './components/CategoryManager';
@@ -15,22 +16,34 @@ import Reports from './components/Reports';
 import { ToastProvider } from './context/ToastContext';
 import type { Transaction } from './types'; // Import Transaction type
 
-function App() {
+function AppContent() {
   const { wallets, getWalletBalance } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports'>('dashboard');
 
   const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
 
   const handleOpenModal = (transaction?: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsModalOpen(true);
+    if (transaction) {
+      if (transaction.type === 'income') {
+        setSelectedTransaction(transaction);
+        setIsReturnModalOpen(true);
+      } else {
+        setSelectedTransaction(transaction);
+        setIsModalOpen(true);
+      }
+    } else {
+      setSelectedTransaction(undefined);
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
     setSelectedTransaction(undefined);
     setIsModalOpen(false);
+    setIsReturnModalOpen(false);
   };
 
   return (
@@ -42,6 +55,7 @@ function App() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           className="hidden md:flex w-64 flex-shrink-0 z-50 shadow-sm"
+          onOpenReturn={() => setIsReturnModalOpen(true)}
         />
 
         {/* Main Content Wrapper */}
@@ -78,26 +92,21 @@ function App() {
               </h1>
               <p className="text-gray-500 text-sm">Gerencie seus gastos de viagem</p>
             </div>
-            <button
-              onClick={() => handleOpenModal()}
-              className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all flex items-center gap-2 font-medium"
-            >
-              <Plus size={20} />
-              Nova Despesa
-            </button>
           </header>
 
           {/* Main Content Area */}
-          <main className="flex-1 p-4 md:p-8 max-w-md md:max-w-7xl mx-auto w-full space-y-6 pb-24 md:pb-8">
+          <main className="flex-1 p-4 md:p-8 pt-0 pb-24 md:pb-8 max-w-7xl mx-auto w-full">
 
             {/* Wallets & Dashboard */}
             {activeTab === 'dashboard' && (
-              <div className="flex flex-col gap-6">
+              <div className="space-y-6">
 
                 {/* Desktop Balance Card */}
-                <div className="hidden md:block bg-gradient-to-r from-blue-600 to-blue-500 rounded-3xl p-8 text-white shadow-xl">
-                  <p className="text-blue-100 mb-2">Saldo Total</p>
-                  <h2 className="text-5xl font-bold">${totalBalance.toFixed(2)}</h2>
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 hidden md:flex">
+                  <div>
+                    <p className="text-gray-500 text-sm">Saldo Total da Viagem</p>
+                    <h2 className="text-5xl font-bold text-gray-800">${totalBalance.toFixed(2)}</h2>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -168,23 +177,57 @@ function App() {
           </main>
         </div>
 
-        {/* Mobile Floating Action Button (FAB) */}
-        <button
-          onClick={() => handleOpenModal()}
-          className="md:hidden fixed bottom-24 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-transform active:scale-95 z-50 flex items-center justify-center"
-          aria-label="Nova Despesa"
-        >
-          <Plus size={28} />
-        </button>
+        {/* Mobile Floating Action Button (FAB) Group */}
+        <div className="md:hidden fixed bottom-24 right-6 flex flex-col gap-3 z-50">
+          <button
+            onClick={() => setIsReturnModalOpen(true)}
+            className="bg-green-600 text-white p-3 rounded-full shadow-xl hover:bg-green-700 transition-transform active:scale-95 flex items-center justify-center"
+            aria-label="Devolução"
+          >
+            <ArrowRightLeft size={24} />
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-transform active:scale-95 flex items-center justify-center"
+            aria-label="Nova Despesa"
+          >
+            <Plus size={28} />
+          </button>
+        </div>
+
+        {/* Modals */}
+        {isModalOpen && (
+          <AddTransactionModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            initialData={selectedTransaction}
+          />
+        )}
+
+        {isReturnModalOpen && (
+          <AddReturnModal
+            isOpen={isReturnModalOpen}
+            onClose={handleCloseModal}
+            initialData={selectedTransaction}
+          />
+        )}
 
         {/* Mobile Bottom Navigation */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center p-4 pb-6 z-40 safe-area-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around p-4 pb-6 z-50">
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600' : 'text-gray-400'}`}
           >
             <Home size={24} />
             <span className="text-xs font-medium">Início</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'reports' ? 'text-blue-600' : 'text-gray-400'}`}
+          >
+            <PieChart size={24} />
+            <span className="text-xs font-medium">Relatórios</span>
           </button>
 
           <button
@@ -196,22 +239,23 @@ function App() {
           </button>
 
           <button
-            onClick={() => setActiveTab('settings')}
-            className={`flex flex-col items-center gap-1 ${activeTab === 'settings' ? 'text-blue-600' : 'text-gray-400'}`}
+            onClick={() => setActiveTab('history')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}
           >
-            <Settings size={24} />
-            <span className="text-xs font-medium">Ajustes</span>
+            <Wallet size={24} />
+            <span className="text-xs font-medium">Histórico</span>
           </button>
-        </div>
+        </nav>
 
-        {/* Modals */}
-        {isModalOpen && (
-          <AddTransactionModal onClose={handleCloseModal} initialData={selectedTransaction} />
-        )}
       </div>
     </ToastProvider>
   );
 }
 
-export default App;
-
+export default function App() {
+  return (
+    <ExpenseProvider>
+      <AppContent />
+    </ExpenseProvider>
+  );
+}
