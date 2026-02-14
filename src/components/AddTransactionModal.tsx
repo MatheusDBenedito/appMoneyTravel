@@ -12,13 +12,14 @@ interface AddTransactionModalProps {
 }
 
 const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, initialData }) => {
-    const { addTransaction, updateTransaction, removeTransaction, wallets, categories, autoSharedCategories } = useExpenses();
+    const { addTransaction, updateTransaction, removeTransaction, wallets, categories, autoSharedCategories, paymentMethods } = useExpenses();
     const { showToast } = useToast();
 
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState<Category>('General');
     const [payer, setPayer] = useState<WalletType>(wallets[0]?.id || '');
+    const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0] || '');
     const [isShared, setIsShared] = useState(false);
 
     // Confirm Modal State
@@ -35,6 +36,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
             setCategory(initialData.category);
             setPayer(initialData.payer);
             setIsShared(initialData.isShared);
+            if (initialData.paymentMethod) setPaymentMethod(initialData.paymentMethod);
         }
     }, [initialData]);
 
@@ -66,6 +68,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
                 category,
                 payer,
                 isShared,
+                paymentMethod,
                 date: initialData ? initialData.date : new Date(),
             };
 
@@ -161,6 +164,32 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
                                 placeholder="Qual a despesa?"
                                 required
                             />
+                        </div>
+
+
+                        {/* Payment Method */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">Forma de Pagamento</label>
+                            <div className="flex flex-wrap gap-2 bg-gray-50 p-1 rounded-xl">
+                                {paymentMethods.map(method => (
+                                    <button
+                                        key={method}
+                                        type="button"
+                                        onClick={() => setPaymentMethod(method)}
+                                        className={clsx(
+                                            "flex-1 min-w-[80px] py-2 rounded-lg text-xs font-bold transition-all",
+                                            paymentMethod === method
+                                                ? "bg-white text-blue-600 shadow-sm"
+                                                : "text-gray-400 hover:text-gray-600"
+                                        )}
+                                    >
+                                        {method}
+                                    </button>
+                                ))}
+                                {paymentMethods.length === 0 && (
+                                    <span className="text-xs text-gray-400 p-2">Nenhuma forma de pagamento cadastrada.</span>
+                                )}
+                            </div>
                         </div>
 
                         {/* Category */}

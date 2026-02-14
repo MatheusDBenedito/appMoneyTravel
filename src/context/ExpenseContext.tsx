@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Wallet, Transaction, Category, WalletType, ExchangeTransaction } from '../types';
+import React, { createContext, useContext, useContextSelector, useState, useEffect, type ReactNode } from 'react';
+import type { Wallet, Transaction, Category, WalletType, ExchangeTransaction, PaymentMethod } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface ExpenseContextType {
@@ -8,6 +9,7 @@ interface ExpenseContextType {
     exchanges: ExchangeTransaction[];
     categories: Category[];
     autoSharedCategories: Category[];
+    paymentMethods: PaymentMethod[];
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
     updateTransaction: (transaction: Transaction) => Promise<void>;
     removeTransaction: (id: string) => Promise<void>;
@@ -21,6 +23,8 @@ interface ExpenseContextType {
     toggleAutoShare: (category: string) => Promise<void>;
     updateBudget: (walletId: WalletType, amount: number) => Promise<void>;
     getWalletBalance: (walletId: WalletType) => number;
+    addPaymentMethod: (name: string) => Promise<void>;
+    removePaymentMethod: (name: string) => Promise<void>;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -31,6 +35,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [exchanges, setExchanges] = useState<ExchangeTransaction[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [autoSharedCategories, setAutoSharedCategories] = useState<Category[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
     useEffect(() => {
         fetchInitialData();
@@ -45,7 +50,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             if (transactionsData) {
                 const mappedTransactions = transactionsData.map((t: any) => ({
                     ...t,
-                    isShared: t.is_shared
+                    isShared: t.is_shared,
+                    paymentMethod: t.payment_method
                 }));
                 setTransactions(mappedTransactions);
             }
@@ -57,7 +63,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                     originCurrency: e.origin_currency,
                     originAmount: e.origin_amount,
                     targetAmount: e.target_amount,
-                    targetWallet: e.target_wallet
+                    targetWallet: e.target_wallet,
+                    location: e.location
                 }));
                 setExchanges(mappedExchanges);
             }
@@ -67,6 +74,9 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
             const { data: sharedData } = await supabase.from('auto_shared_categories').select('category_name');
             if (sharedData) setAutoSharedCategories(sharedData.map((s: any) => s.category_name));
+
+            const { data: paymentMethodsData } = await supabase.from('payment_methods').select('name').order('created_at', { ascending: true });
+            if (paymentMethodsData) setPaymentMethods(paymentMethodsData.map((p: any) => p.name));
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -150,6 +160,21 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
+    const addPaymentMethod = async (name: string) => {
+        if (paymentMethods.includes(name)) return;
+        const { error } = await supabase.from('payment_methods').insert([{ name }]);
+        if (!error) {
+            setPaymentMethods(prev => [...prev, name]);
+        }
+    };
+
+    const removePaymentMethod = async (name: string) => {
+        const { error } = await supabase.from('payment_methods').delete().eq('name', name);
+        if (!error) {
+            setPaymentMethods(prev => prev.filter(p => p !== name));
+        }
+    };
+
     const addTransaction = async (data: Omit<Transaction, 'id'>) => {
         const dbTransaction = {
             description: data.description,
@@ -157,7 +182,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             date: data.date,
             category: data.category,
             payer: data.payer,
-            is_shared: data.isShared
+            is_shared: data.isShared,
+            payment_method: data.paymentMethod
         };
 
         const { data: result, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
@@ -165,7 +191,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (result && !error) {
             const newTransaction: Transaction = {
                 ...result,
-                isShared: result.is_shared
+                isShared: result.is_shared,
+                paymentMethod: result.payment_method
             };
             setTransactions(prev => [newTransaction, ...prev]);
         }
@@ -178,7 +205,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             target_amount: data.targetAmount,
             rate: data.rate,
             target_wallet: data.targetWallet,
-            date: data.date
+            date: data.date,
+            location: data.location
         };
 
         const { data: result, error } = await supabase.from('exchanges').insert([dbExchange]).select().single();
@@ -189,11 +217,30 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 originCurrency: result.origin_currency,
                 originAmount: result.origin_amount,
                 targetAmount: result.target_amount,
-                targetWallet: result.target_wallet
+                targetWallet: result.target_wallet,
+                location: result.location
             };
             setExchanges(prev => [newExchange, ...prev]);
         }
     };
+
+    // ... (updateBudget, getWalletBalance remain same - skipped in replacement block for brevity/focus, handled by surrounding context if I replace correctly. Better to replace whole function blocks if I can, or targeted.)
+    // Wait, I am replacing a huge chunk. Let me be careful about `updateBudget` and `getWalletBalance`. 
+    // They are in the `TargetContent` range if I am not careful.
+    // The `EndLine` is 248. `updateBudget` starts at 198. `getWalletBalance` starts at 205.
+    // I need to include them in the replacement content unchanged if I'm overwriting them.
+    // Let me construct the replacement content to include them properly.
+
+    // Actually, I can just replace the specific functions `addTransaction`, `addExchange`, `updateTransaction` and `fetchInitialData`.
+    // But `replace_file_content` is "SINGLE CONTIGUOUS block".
+    // `fetchInitialData` is at top. `addTransaction` is middle. `updateTransaction` is bottom.
+    // I should use `multi_replace_file_content` or split this up.
+    // Since I cannot use `multi_replace` because the instructions say "Do NOT make multiple parallel calls to this tool or the replace_file_content tool for the same file", I will use `replace_file_content` multiple times sequentially OR use `multi_replace_file_content` once.
+    // The instructions say: "To edit multiple, non-adjacent lines of code in the same file, make a single call to the multi_replace_file_content".
+    // So `multi_replace_file_content` is the correct tool.
+
+    // RE-EVALUATING TOOL CHOICE:
+    // I will use `multi_replace_file_content` on `src/context/ExpenseContext.tsx`.
 
     const updateBudget = async (walletId: WalletType, amount: number) => {
         const { error } = await supabase.from('wallets').update({ budget: amount }).eq('id', walletId);
@@ -238,7 +285,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             date: transaction.date,
             category: transaction.category,
             payer: transaction.payer,
-            is_shared: transaction.isShared
+            is_shared: transaction.isShared,
+            payment_method: transaction.paymentMethod
         };
 
         const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);
@@ -275,7 +323,10 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             renameWallet,
             toggleAutoShare,
             updateBudget,
-            getWalletBalance
+            getWalletBalance,
+            paymentMethods,
+            addPaymentMethod,
+            removePaymentMethod
         }}>
             {children}
         </ExpenseContext.Provider>

@@ -20,6 +20,12 @@ CREATE TABLE auto_shared_categories (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 3.1 Payment Methods
+CREATE TABLE payment_methods (
+    name TEXT PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- 4. Transactions (Despesas)
 CREATE TABLE transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,6 +35,7 @@ CREATE TABLE transactions (
     category TEXT REFERENCES categories(name) ON DELETE SET NULL,
     payer UUID REFERENCES wallets(id) ON DELETE CASCADE, -- Link to Wallet ID
     is_shared BOOLEAN DEFAULT FALSE,
+    payment_method TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -40,6 +47,7 @@ CREATE TABLE exchanges (
     target_amount NUMERIC NOT NULL,
     rate NUMERIC NOT NULL,
     target_wallet TEXT, -- Can be a UUID or 'both'
+    location TEXT,
     date TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -52,3 +60,6 @@ INSERT INTO categories (name) VALUES
 
 INSERT INTO auto_shared_categories (category_name) VALUES 
 ('Food'), ('Transport'), ('Home');
+
+INSERT INTO payment_methods (name) VALUES 
+('Dinheiro'), ('Crédito'), ('Débito'), ('Pix');

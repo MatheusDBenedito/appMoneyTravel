@@ -16,6 +16,7 @@ export interface Transaction {
     category: Category;
     payer: WalletType;
     isShared: boolean;
+    paymentMethod?: string; // e.g., 'Credit', 'Debit', 'Cash', 'Pix'
 }
 
 export interface ExchangeTransaction {
@@ -26,10 +27,14 @@ export interface ExchangeTransaction {
     targetAmount: number;
     rate: number;
     targetWallet: WalletType | 'both';
+    location?: string; // e.g., 'Wise', 'Western Union', 'Exchange Office'
 }
+
+export type PaymentMethod = string;
 
 export interface AppState {
     wallets: Wallet[];
     transactions: Transaction[];
     exchanges: ExchangeTransaction[];
+    paymentMethods: PaymentMethod[];
 }

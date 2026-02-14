@@ -13,6 +13,7 @@ export default function ExchangeForm() {
     const [targetAmount, setTargetAmount] = useState('');
     const [originCurrency] = useState('BRL');
     const [targetWallet, setTargetWallet] = useState<WalletType | 'both'>('both');
+    const [location, setLocation] = useState('');
 
     const rate = (parseFloat(originAmount) && parseFloat(targetAmount))
         ? (parseFloat(originAmount) / parseFloat(targetAmount)).toFixed(2)
@@ -30,10 +31,12 @@ export default function ExchangeForm() {
                 targetWallet,
                 rate: parseFloat(rate),
                 date: new Date(),
+                location
             });
 
             setOriginAmount('');
             setTargetAmount('');
+            setLocation('');
             showToast('Câmbio registrado com sucesso!', 'success');
         } catch (error) {
             console.error(error);
@@ -87,6 +90,19 @@ export default function ExchangeForm() {
                 {/* Rate Display */}
                 <div className="text-center text-sm text-gray-500">
                     Cotação estimada: <span className="font-bold text-gray-800">R$ {rate}</span>
+                </div>
+
+
+                {/* Broker/Location */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-500 mb-1">Corretora / Local</label>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium"
+                        placeholder="Ex: Wise, Western Union"
+                    />
                 </div>
 
                 {/* Target Wallet */}

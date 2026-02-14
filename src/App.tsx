@@ -8,6 +8,7 @@ import AddTransactionModal from './components/AddTransactionModal';
 import ExchangeForm from './components/ExchangeForm';
 import PeopleManager from './components/PeopleManager';
 import CategoryManager from './components/CategoryManager';
+import PaymentMethodManager from './components/PaymentMethodManager';
 import WalletCard from './components/WalletCard';
 import { ToastProvider } from './context/ToastContext';
 import type { Transaction } from './types'; // Import Transaction type
@@ -140,6 +141,7 @@ function App() {
               <section className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <PeopleManager />
+                  <PaymentMethodManager />
                 </div>
                 <div className="space-y-6">
                   <CategoryManager />
