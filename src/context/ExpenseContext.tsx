@@ -17,7 +17,7 @@ interface ExpenseContextType {
     removeExchange: (id: string) => Promise<void>;
     addWallet: (name: string, avatarUrl?: string) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
-    updateWalletAvatar: (id: string, avatarUrl: string) => Promise<void>;
+    updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error: any }>;
     uploadAvatar: (file: File) => Promise<string | null>;
     addCategory: (name: string) => Promise<void>;
     removeCategory: (name: string) => Promise<void>;
@@ -98,7 +98,10 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         const { error } = await supabase.from('wallets').update({ avatar_url: avatarUrl }).eq('id', id);
         if (!error) {
             setWallets(prev => prev.map(w => w.id === id ? { ...w, avatar_url: avatarUrl } : w));
+        } else {
+            console.error('Error updating wallet avatar:', error);
         }
+        return { error };
     };
 
     const uploadAvatar = async (file: File) => {

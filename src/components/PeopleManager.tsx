@@ -25,8 +25,12 @@ export default function PeopleManager() {
                 try {
                     const url = await uploadAvatar(selectedFile);
                     if (url) {
-                        await updateWalletAvatar(walletId, url);
-                        showToast('Foto atualizada com sucesso!', 'success');
+                        const { error } = await updateWalletAvatar(walletId, url);
+                        if (error) {
+                            showToast('Erro ao atualizar banco de dados.', 'error');
+                        } else {
+                            showToast('Foto atualizada com sucesso!', 'success');
+                        }
                     } else {
                         showToast('Erro ao fazer upload da imagem.', 'error');
                     }
