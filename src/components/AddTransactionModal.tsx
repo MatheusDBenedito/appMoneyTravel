@@ -29,11 +29,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
     // Refs for focus management
     const descriptionRef = useRef<HTMLInputElement>(null);
 
-    // Initialize state with initialData if provided
     useEffect(() => {
         if (initialData) {
-            setAmount(initialData.amount.toString());
-            setTax(initialData.tax ? initialData.tax.toString() : '');
+            const taxVal = initialData.tax || 0;
+            const baseAmount = initialData.amount - taxVal;
+
+            setAmount(baseAmount.toString());
+            setTax(taxVal > 0 ? taxVal.toString() : '');
             setDescription(initialData.description);
             setCategory(initialData.category);
             setPayer(initialData.payer);
@@ -64,9 +66,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
         if (!amount || !description) return;
 
         try {
+            const taxValue = tax ? parseFloat(tax) : 0;
+            const baseAmount = parseFloat(amount);
+            const totalAmount = baseAmount + taxValue;
+
             const transactionData = {
-                amount: parseFloat(amount),
-                tax: tax ? parseFloat(tax) : 0,
+                amount: totalAmount,
+                tax: taxValue,
                 description,
                 category,
                 payer,

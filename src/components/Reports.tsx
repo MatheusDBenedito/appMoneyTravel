@@ -32,6 +32,7 @@ export default function Reports() {
 
     // 1. Total Spent
     const totalSpent = filteredTransactions.reduce((acc, t) => acc + t.amount, 0);
+    const totalTax = filteredTransactions.reduce((acc, t) => acc + (t.tax || 0), 0);
 
     // 2. Category Breakdown
     const categoryStats = useMemo(() => {
@@ -131,13 +132,23 @@ export default function Reports() {
 
             {/* Total Card */}
             <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 text-white shadow-xl">
-                <div className="flex items-center gap-4 mb-2">
-                    <div className="p-3 bg-white/20 rounded-full backdrop-blur-sm">
-                        <TrendingUp size={24} className="text-white" />
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-white/20 rounded-full backdrop-blur-sm">
+                            <TrendingUp size={24} className="text-white" />
+                        </div>
+                        <div>
+                            <p className="text-purple-100 text-sm font-medium">Total Gasto no Período</p>
+                            <h2 className="text-4xl font-bold">${totalSpent.toFixed(2)}</h2>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-purple-100 text-sm font-medium">Total Gasto no Período</p>
-                        <h2 className="text-4xl font-bold">${totalSpent.toFixed(2)}</h2>
+
+                    <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[200px]">
+                        <p className="text-purple-100 text-sm font-medium mb-1">Total em Taxas</p>
+                        <p className="text-2xl font-bold">${totalTax.toFixed(2)}</p>
+                        <p className="text-xs text-purple-200 mt-1">
+                            {totalSpent > 0 ? ((totalTax / totalSpent) * 100).toFixed(1) : 0}% do total
+                        </p>
                     </div>
                 </div>
             </div>
