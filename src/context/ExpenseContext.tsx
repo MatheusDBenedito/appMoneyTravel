@@ -96,7 +96,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 const { data: walletsData } = await supabase.from('wallets').select('*').eq('trip_id', activeTripId).order('created_at');
                 const { data: transactionsData } = await supabase.from('transactions').select('*').eq('trip_id', activeTripId).order('date', { ascending: false });
                 const { data: exchangesData } = await supabase.from('exchanges').select('*').eq('trip_id', activeTripId).order('date', { ascending: false });
-                const { data: categoriesData } = await supabase.from('categories').select('name').eq('trip_id', activeTripId);
+                const { data: categoriesData } = await supabase.from('categories').select('name, icon').eq('trip_id', activeTripId);
                 const { data: autoSharedData } = await supabase.from('auto_shared_categories').select('category_name').eq('trip_id', activeTripId);
                 const { data: paymentMethodsData } = await supabase.from('payment_methods').select('name').eq('trip_id', activeTripId);
 
