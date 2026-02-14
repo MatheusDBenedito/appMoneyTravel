@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import React, { createContext, useContext, useContextSelector, useState, useEffect, type ReactNode } from 'react';
 import type { Wallet, Transaction, Category, WalletType, ExchangeTransaction, PaymentMethod } from '../types';
 import { supabase } from '../lib/supabase';
 
