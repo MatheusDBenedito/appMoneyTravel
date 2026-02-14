@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { X, Check } from 'lucide-react';
 import type { Category, WalletType } from '../types';
@@ -16,6 +16,16 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
     const [category, setCategory] = useState<Category>('General');
     const [payer, setPayer] = useState<WalletType>(wallets[0]?.id || '');
     const [isShared, setIsShared] = useState(false);
+
+    // Refs for focus management
+    const descriptionRef = useRef<HTMLInputElement>(null);
+
+    // Auto-select first wallet if payer is empty (e.g. on load)
+    useEffect(() => {
+        if (!payer && wallets.length > 0) {
+            setPayer(wallets[0].id);
+        }
+    }, [wallets, payer]);
 
     // Auto-toggle shared based on category
     useEffect(() => {
@@ -42,6 +52,21 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
         onClose();
     };
 
+    const handleAmountKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submit
+            descriptionRef.current?.focus(); // Move focus to description
+        }
+    };
+
+    const handleDescriptionKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent accidental submit
+            // Start submission manually if desired, or just blur to close keyboard
+            (e.target as HTMLInputElement).blur();
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300">
@@ -65,6 +90,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                                 step="0.01"
                                 inputMode="decimal"
                                 value={amount}
+                                onKeyDown={handleAmountKeyDown}
                                 onChange={(e) => setAmount(e.target.value)}
                                 className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="0.00"
@@ -78,8 +104,10 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                     <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1">Description</label>
                         <input
+                            ref={descriptionRef}
                             type="text"
                             value={description}
+                            onKeyDown={handleDescriptionKeyDown}
                             onChange={(e) => setDescription(e.target.value)}
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="What is it for?"
