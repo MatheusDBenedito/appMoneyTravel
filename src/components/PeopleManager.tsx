@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
-import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign, RotateCcw } from 'lucide-react';
+import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function PeopleManager() {
