@@ -73,10 +73,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
             };
 
             if (initialData) {
-                await updateTransaction({ ...transactionData, id: initialData.id });
+                const { error } = await updateTransaction({ ...transactionData, id: initialData.id });
+                if (error) throw error;
                 showToast('Despesa atualizada com sucesso!', 'success');
             } else {
-                await addTransaction(transactionData);
+                const { error } = await addTransaction(transactionData);
+                if (error) throw error;
                 showToast('Despesa adicionada com sucesso!', 'success');
             }
 

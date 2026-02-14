@@ -9,8 +9,8 @@ interface ExpenseContextType {
     categories: Category[];
     autoSharedCategories: Category[];
     paymentMethods: PaymentMethod[];
-    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
-    updateTransaction: (transaction: Transaction) => Promise<void>;
+    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ error: any }>;
+    updateTransaction: (transaction: Transaction) => Promise<{ error: any }>;
     removeTransaction: (id: string) => Promise<void>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
@@ -249,6 +249,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             };
             setTransactions(prev => [newTransaction, ...prev]);
         }
+        return { error };
     };
 
     const addExchange = async (data: Omit<ExchangeTransaction, 'id'>) => {
@@ -370,8 +371,13 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);
 
         if (!error) {
+            console.log('Transaction updated successfully:', transaction);
             setTransactions(prev => prev.map(t => t.id === transaction.id ? transaction : t));
+        } else {
+            console.error('Error updating transaction:', error);
+            console.error('Payload was:', dbTransaction);
         }
+        return { error };
     };
 
     const removeTransaction = async (id: string) => {
