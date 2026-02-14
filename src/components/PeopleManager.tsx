@@ -69,21 +69,33 @@ export default function PeopleManager() {
         setErrorId(null);
     };
 
-    const startEditing = (id: string, currentName: string, currentIncludes: boolean, currentBudget: number) => {
+    const startEditing = (id: string, currentName: string, currentIncludes: boolean) => { // Removed budget param, will calc
         setEditingId(id);
         setEditName(currentName);
         setEditIncludes(currentIncludes);
-        setEditBudget(currentBudget.toString());
+        const currentBalance = getWalletBalance(id);
+        setEditBudget(currentBalance.toFixed(2));
     };
 
     const saveEdit = async (id: string) => {
         if (editName.trim()) {
             renameWallet(id, editName.trim());
         }
-        // Save budget
-        const budgetVal = parseFloat(editBudget);
-        if (!isNaN(budgetVal)) {
-            updateBudget(id, budgetVal);
+        // Smart Balance Adjustment
+        // User inputs the TARGET balance they want to see.
+        // We calculate the necessary Budget (Initial Balance) shift to achieve that.
+        // Formula: NewBudget = OldBudget + (TargetBalance - CurrentBalance)
+        const targetBalance = parseFloat(editBudget);
+        const wallet = wallets.find(w => w.id === id);
+
+        if (!isNaN(targetBalance) && wallet) {
+            const currentBalance = getWalletBalance(id);
+            // Only update if there's a difference to avoid floating point noise on no-change
+            if (Math.abs(targetBalance - currentBalance) > 0.001) {
+                const diff = targetBalance - currentBalance;
+                const newBudget = wallet.budget + diff;
+                updateBudget(id, newBudget);
+            }
         }
 
         // Save division status
@@ -145,7 +157,8 @@ export default function PeopleManager() {
                                                     value={editBudget}
                                                     onChange={(e) => setEditBudget(e.target.value)}
                                                     className="w-full text-xs p-1 border border-transparent hover:border-gray-200 rounded focus:outline-none focus:border-purple-300"
-                                                    placeholder="Saldo Inicial"
+                                                    placeholder="Definir Saldo Atual"
+                                                    title="Ao alterar este valor, o Saldo Inicial será reajustado automaticamente para atingir o valor desejado."
                                                 />
                                             </div>
                                         </div>
@@ -187,7 +200,7 @@ export default function PeopleManager() {
 
                                             <span className="font-bold text-gray-800">{wallet.name}</span>
                                             <button
-                                                onClick={() => startEditing(wallet.id, wallet.name, wallet.includedInDivision, wallet.budget)}
+                                                onClick={() => startEditing(wallet.id, wallet.name, wallet.includedInDivision)}
                                                 className="text-gray-300 hover:text-purple-600 transition-colors"
                                             >
                                                 <Pencil size={14} />
