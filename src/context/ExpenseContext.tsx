@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Wallet, Transaction, Category, WalletType, ExchangeTransaction } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface ExpenseContextType {
     wallets: Wallet[];
@@ -7,149 +8,196 @@ interface ExpenseContextType {
     exchanges: ExchangeTransaction[];
     categories: Category[];
     autoSharedCategories: Category[];
-    addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
-    addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => void;
-    addWallet: (name: string) => void;
-    removeWallet: (id: string) => void;
-    addCategory: (name: string) => void;
-    removeCategory: (name: string) => void;
-    renameCategory: (oldName: string, newName: string) => void;
-    renameWallet: (id: string, newName: string) => void;
-    toggleAutoShare: (category: string) => void;
-    updateBudget: (walletId: WalletType, amount: number) => void;
+    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
+    addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
+    addWallet: (name: string) => Promise<void>;
+    removeWallet: (id: string) => Promise<void>;
+    addCategory: (name: string) => Promise<void>;
+    removeCategory: (name: string) => Promise<void>;
+    renameCategory: (oldName: string, newName: string) => Promise<void>;
+    renameWallet: (id: string, newName: string) => Promise<void>;
+    toggleAutoShare: (category: string) => Promise<void>;
+    updateBudget: (walletId: WalletType, amount: number) => Promise<void>;
     getWalletBalance: (walletId: WalletType) => number;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
-const DEFAULT_CATEGORIES: Category[] = ['General', 'Food', 'Transport', 'Home', 'Shopping', 'Entertainment'];
-const DEFAULT_SHARED: Category[] = ['Food', 'Transport', 'Home'];
-
-const INITIAL_WALLETS: Wallet[] = [
-    { id: 'me', name: 'Eu', budget: 0 },
-    { id: 'wife', name: 'Esposa', budget: 0 },
-];
-
 export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [wallets, setWallets] = useState<Wallet[]>(() => {
-        const saved = localStorage.getItem('wallets');
-        return saved ? JSON.parse(saved) : INITIAL_WALLETS;
-    });
-
-    const [transactions, setTransactions] = useState<Transaction[]>(() => {
-        const saved = localStorage.getItem('transactions');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    const [exchanges, setExchanges] = useState<ExchangeTransaction[]>(() => {
-        const saved = localStorage.getItem('exchanges');
-        return saved ? JSON.parse(saved) : [];
-    });
-
-    const [categories, setCategories] = useState<Category[]>(() => {
-        const saved = localStorage.getItem('categories');
-        return saved ? JSON.parse(saved) : DEFAULT_CATEGORIES;
-    });
-
-    const [autoSharedCategories, setAutoSharedCategories] = useState<Category[]>(() => {
-        const saved = localStorage.getItem('autoSharedCategories');
-        return saved ? JSON.parse(saved) : DEFAULT_SHARED;
-    });
+    const [wallets, setWallets] = useState<Wallet[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [exchanges, setExchanges] = useState<ExchangeTransaction[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [autoSharedCategories, setAutoSharedCategories] = useState<Category[]>([]);
 
     useEffect(() => {
-        localStorage.setItem('wallets', JSON.stringify(wallets));
-    }, [wallets]);
+        fetchInitialData();
+    }, []);
 
-    useEffect(() => {
-        localStorage.setItem('transactions', JSON.stringify(transactions));
-    }, [transactions]);
+    const fetchInitialData = async () => {
+        try {
+            const { data: walletsData } = await supabase.from('wallets').select('*').order('created_at', { ascending: true });
+            if (walletsData) setWallets(walletsData);
 
-    useEffect(() => {
-        localStorage.setItem('exchanges', JSON.stringify(exchanges));
-    }, [exchanges]);
+            const { data: transactionsData } = await supabase.from('transactions').select('*').order('date', { ascending: false });
+            if (transactionsData) {
+                const mappedTransactions = transactionsData.map((t: any) => ({
+                    ...t,
+                    isShared: t.is_shared
+                }));
+                setTransactions(mappedTransactions);
+            }
 
-    useEffect(() => {
-        localStorage.setItem('categories', JSON.stringify(categories));
-    }, [categories]);
+            const { data: exchangesData } = await supabase.from('exchanges').select('*').order('date', { ascending: false });
+            if (exchangesData) {
+                const mappedExchanges = exchangesData.map((e: any) => ({
+                    ...e,
+                    originCurrency: e.origin_currency,
+                    originAmount: e.origin_amount,
+                    targetAmount: e.target_amount,
+                    targetWallet: e.target_wallet
+                }));
+                setExchanges(mappedExchanges);
+            }
 
-    useEffect(() => {
-        localStorage.setItem('autoSharedCategories', JSON.stringify(autoSharedCategories));
-    }, [autoSharedCategories]);
+            const { data: categoriesData } = await supabase.from('categories').select('name');
+            if (categoriesData) setCategories(categoriesData.map((c: any) => c.name));
 
-    const addWallet = (name: string) => {
-        const newWallet: Wallet = {
-            id: crypto.randomUUID(),
-            name,
-            budget: 0,
-        };
-        setWallets(prev => [...prev, newWallet]);
+            const { data: sharedData } = await supabase.from('auto_shared_categories').select('category_name');
+            if (sharedData) setAutoSharedCategories(sharedData.map((s: any) => s.category_name));
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     };
 
-    const removeWallet = (id: string) => {
-        // Optional: Check if used in transactions? 
-        // For now, allow delete. It might break history display if not careful, 
-        // but let's assume user knows what they are doing or we filter out invalid refs.
-        setWallets(prev => prev.filter(w => w.id !== id));
+    const addWallet = async (name: string) => {
+        const { data, error } = await supabase.from('wallets').insert([{ name, budget: 0 }]).select().single();
+        if (data && !error) {
+            setWallets(prev => [...prev, data]);
+        }
     };
 
-    const addCategory = (name: string) => {
-        if (!categories.includes(name)) {
+    const removeWallet = async (id: string) => {
+        const { error } = await supabase.from('wallets').delete().eq('id', id);
+        if (!error) {
+            setWallets(prev => prev.filter(w => w.id !== id));
+        }
+    };
+
+    const renameWallet = async (id: string, newName: string) => {
+        const { error } = await supabase.from('wallets').update({ name: newName }).eq('id', id);
+        if (!error) {
+            setWallets(prev => prev.map(w => w.id === id ? { ...w, name: newName } : w));
+        }
+    };
+
+    const addCategory = async (name: string) => {
+        if (categories.includes(name)) return;
+        const { error } = await supabase.from('categories').insert([{ name }]);
+        if (!error) {
             setCategories(prev => [...prev, name]);
         }
     };
 
-    const removeCategory = (name: string) => {
-        setCategories(prev => prev.filter(c => c !== name));
-        setAutoSharedCategories(prev => prev.filter(c => c !== name));
+    const removeCategory = async (name: string) => {
+        const { error } = await supabase.from('categories').delete().eq('name', name);
+        if (!error) {
+            setCategories(prev => prev.filter(c => c !== name));
+            setAutoSharedCategories(prev => prev.filter(c => c !== name));
+        }
     };
 
-    const renameCategory = (oldName: string, newName: string) => {
-        if (categories.includes(newName)) return; // Prevent duplicates
+    const renameCategory = async (oldName: string, newName: string) => {
+        if (categories.includes(newName)) return;
 
+        // 1. Create new category
+        const { error: createError } = await supabase.from('categories').insert([{ name: newName }]);
+        if (createError) return;
+
+        // 2. Update transactions
+        await supabase.from('transactions').update({ category: newName }).eq('category', oldName);
+
+        // 3. Update Auto Shared
+        if (autoSharedCategories.includes(oldName)) {
+            await supabase.from('auto_shared_categories').insert([{ category_name: newName }]);
+        }
+
+        // 4. Delete old category (Cascades delete to auto_shared, and transactions set null if missed, but we updated them)
+        await supabase.from('categories').delete().eq('name', oldName);
+
+        // Refresh local state fully to be safe, or manually map
         setCategories(prev => prev.map(c => c === oldName ? newName : c));
         setAutoSharedCategories(prev => prev.map(c => c === oldName ? newName : c));
         setTransactions(prev => prev.map(t => t.category === oldName ? { ...t, category: newName } : t));
     };
 
-    const renameWallet = (id: string, newName: string) => {
-        setWallets(prev => prev.map(w => w.id === id ? { ...w, name: newName } : w));
-    };
-
-    const toggleAutoShare = (category: string) => {
-        setAutoSharedCategories(prev => {
-            if (prev.includes(category)) {
-                return prev.filter(c => c !== category);
-            } else {
-                return [...prev, category];
+    const toggleAutoShare = async (category: string) => {
+        if (autoSharedCategories.includes(category)) {
+            // Remove
+            const { error } = await supabase.from('auto_shared_categories').delete().eq('category_name', category);
+            if (!error) {
+                setAutoSharedCategories(prev => prev.filter(c => c !== category));
             }
-        });
+        } else {
+            // Add
+            const { error } = await supabase.from('auto_shared_categories').insert([{ category_name: category }]);
+            if (!error) {
+                setAutoSharedCategories(prev => [...prev, category]);
+            }
+        }
     };
 
-    const addTransaction = (data: Omit<Transaction, 'id'>) => {
-        const newTransaction: Transaction = {
-            ...data,
-            id: crypto.randomUUID(),
+    const addTransaction = async (data: Omit<Transaction, 'id'>) => {
+        const dbTransaction = {
+            description: data.description,
+            amount: data.amount,
+            date: data.date,
+            category: data.category,
+            payer: data.payer,
+            is_shared: data.isShared
         };
-        setTransactions(prev => [newTransaction, ...prev]);
+
+        const { data: result, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
+
+        if (result && !error) {
+            const newTransaction: Transaction = {
+                ...result,
+                isShared: result.is_shared
+            };
+            setTransactions(prev => [newTransaction, ...prev]);
+        }
     };
 
-    const addExchange = (data: Omit<ExchangeTransaction, 'id'>) => {
-        const newExchange: ExchangeTransaction = {
-            ...data,
-            id: crypto.randomUUID(),
+    const addExchange = async (data: Omit<ExchangeTransaction, 'id'>) => {
+        const dbExchange = {
+            origin_currency: data.originCurrency,
+            origin_amount: data.originAmount,
+            target_amount: data.targetAmount,
+            rate: data.rate,
+            target_wallet: data.targetWallet,
+            date: data.date
         };
-        setExchanges(prev => [newExchange, ...prev]);
 
-        // Also update the budget directly for simplicity in the current architecture,
-        // OR we rely purely on getWalletBalance.
-        // The user request says: "total balance deve ser populado de acordo com o valor comprado".
-        // Use getWalletBalance to derive it dynamically is safer.
-        // But Wallet.budget was editable. 
-        // I will make getWalletBalance derive from Exchanges + Initial Budget (which we can keep as 0 or manual adjustment).
+        const { data: result, error } = await supabase.from('exchanges').insert([dbExchange]).select().single();
+
+        if (result && !error) {
+            const newExchange: ExchangeTransaction = {
+                ...result,
+                originCurrency: result.origin_currency,
+                originAmount: result.origin_amount,
+                targetAmount: result.target_amount,
+                targetWallet: result.target_wallet
+            };
+            setExchanges(prev => [newExchange, ...prev]);
+        }
     };
 
-    const updateBudget = (walletId: WalletType, amount: number) => {
-        setWallets(prev => prev.map(w => w.id === walletId ? { ...w, budget: amount } : w));
+    const updateBudget = async (walletId: WalletType, amount: number) => {
+        const { error } = await supabase.from('wallets').update({ budget: amount }).eq('id', walletId);
+        if (!error) {
+            setWallets(prev => prev.map(w => w.id === walletId ? { ...w, budget: amount } : w));
+        }
     };
 
     const getWalletBalance = (walletId: WalletType) => {
@@ -161,9 +209,6 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Add Exchanges
         exchanges.forEach(ex => {
             if (ex.targetWallet === 'both') {
-                // "Both" in legacy terms meant "Split among all".
-                // If targetWallet is 'both', we assume equal split among ALL wallets.
-                // Dynamic split:
                 balance += (ex.targetAmount / wallets.length);
             } else if (ex.targetWallet === walletId) {
                 balance += ex.targetAmount;
@@ -173,7 +218,6 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Subtract Expenses
         transactions.forEach(t => {
             if (t.isShared) {
-                // Shared: Split among ALL wallets
                 balance -= (t.amount / wallets.length);
             } else {
                 if (t.payer === walletId) {
