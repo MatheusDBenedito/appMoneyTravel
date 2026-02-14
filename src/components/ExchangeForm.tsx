@@ -3,7 +3,6 @@ import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
 import { ArrowDown, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
-import { clsx } from 'clsx';
 import type { WalletType } from '../types';
 import ExchangeList from './ExchangeList';
 
@@ -149,9 +148,8 @@ export default function ExchangeForm() {
                 </button>
 
             </form>
-            </form>
 
             <ExchangeList />
-        </div >
+        </div>
     );
 }

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
-import { ExchangeTransaction, WalletType } from '../types';
+import type { ExchangeTransaction, WalletType } from '../types';
 import { X, DollarSign, ArrowDown, Save } from 'lucide-react';
 import { clsx } from 'clsx';
 

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
-import { ExchangeTransaction } from '../types';
-import { Trash2, Pencil, Calendar, DollarSign, MapPin } from 'lucide-react';
+import type { ExchangeTransaction } from '../types';
+import { Trash2, Pencil, Calendar, MapPin } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';
 import EditExchangeModal from './EditExchangeModal';
 
