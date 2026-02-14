@@ -5,6 +5,7 @@ export interface Wallet {
     name: string;
     budget: number;
     avatar_url?: string;
+    includedInDivision: boolean;
 }
 
 export type Category = string;

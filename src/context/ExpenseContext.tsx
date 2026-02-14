@@ -15,7 +15,7 @@ interface ExpenseContextType {
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
     removeExchange: (id: string) => Promise<void>;
-    addWallet: (name: string, avatarUrl?: string) => Promise<void>;
+    addWallet: (name: string, avatarUrl?: string, includedInDivision?: boolean) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
     updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error: any }>;
     uploadAvatar: (file: File) => Promise<string | null>;
@@ -48,7 +48,12 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const fetchInitialData = async () => {
         try {
             const { data: walletsData } = await supabase.from('wallets').select('*').order('created_at', { ascending: true });
-            if (walletsData) setWallets(walletsData);
+            if (walletsData) {
+                setWallets(walletsData.map((w: any) => ({
+                    ...w,
+                    includedInDivision: w.included_in_division !== false // Handle null/undefined as true
+                })));
+            }
 
             const { data: transactionsData } = await supabase.from('transactions').select('*').order('date', { ascending: false });
             if (transactionsData) {
@@ -87,10 +92,19 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
-    const addWallet = async (name: string, avatarUrl?: string) => {
-        const { data, error } = await supabase.from('wallets').insert([{ name, budget: 0, avatar_url: avatarUrl }]).select().single();
+    const addWallet = async (name: string, avatarUrl?: string, includedInDivision: boolean = true) => {
+        const { data, error } = await supabase.from('wallets').insert([{
+            name,
+            budget: 0,
+            avatar_url: avatarUrl,
+            included_in_division: includedInDivision
+        }]).select().single();
+
         if (data && !error) {
-            setWallets(prev => [...prev, data]);
+            setWallets(prev => [...prev, {
+                ...data,
+                includedInDivision: data.included_in_division
+            }]);
         }
     };
 
@@ -332,12 +346,18 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         const wallet = wallets.find(w => w.id === walletId);
         if (!wallet) return 0;
 
+        // Count how many people are participating in the division
+        const dividingWalletsCount = wallets.filter(w => w.includedInDivision).length;
+        const divider = dividingWalletsCount > 0 ? dividingWalletsCount : 1; // Prevent div by zero
+
         let balance = wallet.budget;
 
         // Add Exchanges
         exchanges.forEach(ex => {
             if (ex.targetWallet === 'both') {
-                balance += (ex.targetAmount / wallets.length);
+                if (wallet.includedInDivision) {
+                    balance += (ex.targetAmount / divider);
+                }
             } else if (ex.targetWallet === walletId) {
                 balance += ex.targetAmount;
             }
@@ -346,7 +366,10 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Subtract Expenses
         transactions.forEach(t => {
             if (t.isShared) {
-                balance -= (t.amount / wallets.length);
+                // Only subtract if this wallet is included in division
+                if (wallet.includedInDivision) {
+                    balance -= (t.amount / divider);
+                }
             } else {
                 if (t.payer === walletId) {
                     balance -= t.amount;
@@ -371,11 +394,9 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);
 
         if (!error) {
-            console.log('Transaction updated successfully:', transaction);
             setTransactions(prev => prev.map(t => t.id === transaction.id ? transaction : t));
         } else {
             console.error('Error updating transaction:', error);
-            console.error('Payload was:', dbTransaction);
         }
         return { error };
     };

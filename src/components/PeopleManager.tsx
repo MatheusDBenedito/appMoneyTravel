@@ -11,7 +11,9 @@ export default function PeopleManager() {
     const [errorId, setErrorId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
+    const [editName, setEditName] = useState('');
     const [file, setFile] = useState<File | null>(null); // For new wallet
+    const [includedInDivision, setIncludedInDivision] = useState(true); // New state
     const [uploadingId, setUploadingId] = useState<string | null>(null); // For existing wallet
 
     // Helper to trigger hidden file input from the list (edit mode)
@@ -59,9 +61,10 @@ export default function PeopleManager() {
             if (url) avatarUrl = url;
         }
 
-        await addWallet(newName.trim(), avatarUrl);
+        await addWallet(newName.trim(), avatarUrl, includedInDivision);
         setNewName('');
         setFile(null);
+        setIncludedInDivision(true); // Reset to default
         setErrorId(null);
     };
 
@@ -147,7 +150,15 @@ export default function PeopleManager() {
                                                 className="text-gray-300 hover:text-purple-600 transition-colors"
                                             >
                                                 <Pencil size={14} />
+                                                className="text-gray-300 hover:text-purple-600 transition-colors"
+                                            >
+                                                <Pencil size={14} />
                                             </button>
+                                            {!wallet.includedInDivision && (
+                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200" title="Não participa da divisão de contas compartilhadas">
+                                                    Não Divide
+                                                </span>
+                                            )}
                                         </div>
                                         <span className={clsx("text-xs font-mono", balance >= 0 ? "text-green-600" : "text-red-500")}>
                                             ${balance.toFixed(2)}
@@ -218,6 +229,19 @@ export default function PeopleManager() {
                             <UserPlus size={24} />
                         </button>
                     </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-3 ml-14">
+                    <input
+                        type="checkbox"
+                        id="includedInDivision"
+                        checked={includedInDivision}
+                        onChange={(e) => setIncludedInDivision(e.target.checked)}
+                        className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
+                    />
+                    <label htmlFor="includedInDivision" className="text-sm text-gray-600 cursor-pointer select-none">
+                        Participa da divisão de contas?
+                    </label>
                 </div>
             </form>
         </div>

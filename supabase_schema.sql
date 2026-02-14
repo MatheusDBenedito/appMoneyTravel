@@ -6,7 +6,8 @@ CREATE TABLE wallets (
     name TEXT NOT NULL,
     budget DECIMAL(10,2) DEFAULT 0.00,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    avatar_url TEXT
+    avatar_url TEXT,
+    included_in_division BOOLEAN DEFAULT TRUE
 );
 
 -- 2. Categories
