@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
+import { useToast } from '../context/ToastContext';
 import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function PeopleManager() {
     const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance, uploadAvatar, updateWalletAvatar } = useExpenses();
+    const { showToast } = useToast();
     const [newName, setNewName] = useState('');
     const [errorId, setErrorId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -20,11 +22,22 @@ export default function PeopleManager() {
             if (walletId) {
                 // Determine if we are updating an existing wallet directly
                 setUploadingId(walletId);
-                const url = await uploadAvatar(selectedFile);
-                if (url) {
-                    await updateWalletAvatar(walletId, url);
+                try {
+                    const url = await uploadAvatar(selectedFile);
+                    if (url) {
+                        await updateWalletAvatar(walletId, url);
+                        showToast('Foto atualizada com sucesso!', 'success');
+                    } else {
+                        showToast('Erro ao fazer upload da imagem.', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showToast('Erro ao atualizar foto.', 'error');
+                } finally {
+                    setUploadingId(null);
+                    // Reset input
+                    e.target.value = '';
                 }
-                setUploadingId(null);
             } else {
                 // Setting file for new wallet creation
                 setFile(selectedFile);
