@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
-import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign } from 'lucide-react';
+import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign, RotateCcw } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function PeopleManager() {
@@ -160,6 +160,13 @@ export default function PeopleManager() {
                                                     placeholder="Definir Saldo Atual"
                                                     title="Ao alterar este valor, o Saldo Inicial será reajustado automaticamente para atingir o valor desejado."
                                                 />
+                                                <button
+                                                    onClick={() => setEditBudget('0.00')}
+                                                    className="text-[10px] bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 px-2 py-1 rounded border border-gray-200 transition-colors"
+                                                    title="Zerar Saldo"
+                                                >
+                                                    Zerar
+                                                </button>
                                             </div>
                                         </div>
                                         <button onClick={() => saveEdit(wallet.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full">
