@@ -3,7 +3,7 @@ import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
 import ConfirmModal from './ConfirmModal';
 import { X, Check, Trash2 } from 'lucide-react';
-import type { Category, WalletType, Transaction } from '../types';
+import type { Transaction, WalletType } from '../types';
 import { clsx } from 'clsx';
 
 interface AddTransactionModalProps {
@@ -19,7 +19,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     const [amount, setAmount] = useState('');
     const [tax, setTax] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState<Category>('General');
+    const [category, setCategory] = useState<string>('');
     const [payer, setPayer] = useState<WalletType>(wallets[0]?.id || '');
     const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0] || '');
     const [isShared, setIsShared] = useState(false);
@@ -227,20 +227,20 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                         {/* Category */}
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Categoria</label>
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                                 {categories.map(cat => (
                                     <button
-                                        key={cat}
+                                        key={cat.name}
                                         type="button"
-                                        onClick={() => setCategory(cat)}
+                                        onClick={() => setCategory(cat.name)}
                                         className={clsx(
-                                            "py-2 px-1 rounded-lg text-xs font-medium transition-colors border",
-                                            category === cat
-                                                ? "bg-blue-600 text-white border-blue-600"
-                                                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                            "px-3 py-1.5 rounded-lg text-sm font-medium border transition-all whitespace-nowrap flex items-center gap-2",
+                                            category === cat.name
+                                                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+                                                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
                                         )}
                                     >
-                                        {cat}
+                                        <span>{cat.name}</span>
                                     </button>
                                 ))}
                             </div>

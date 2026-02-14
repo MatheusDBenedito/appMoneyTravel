@@ -37,13 +37,18 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             // Default to first category available
             if (categories.length > 0) {
                 // Try to find 'General' or 'Outros', otherwise first one
-                const defaultCat = categories.find(c => c === 'Geral' || c === 'General' || c === 'Outros') || categories[0];
-                setCategory(defaultCat);
+                const defaultCat = categories.find(c => c.name === 'Geral' || c.name === 'General' || c.name === 'Outros') || categories[0];
+                setCategory(defaultCat.name);
             }
         }
     }, [initialData, categories]);
 
-    // ... (receiver effect) ...
+    // Auto-select first wallet if receiver is empty (e.g. on load)
+    useEffect(() => {
+        if (!receiver && wallets.length > 0 && !initialData) {
+            setReceiver(wallets[0].id);
+        }
+    }, [wallets, receiver, initialData]);
 
     const handleSubmit = async () => {
         if (!amount || !description || !category) return;
@@ -139,6 +144,28 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                 placeholder="Ex: Troco do jantar, Reembolso"
                                 required
                             />
+                        </div>
+
+                        {/* Category Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">Categoria</label>
+                            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                {categories.map(cat => (
+                                    <button
+                                        key={cat.name}
+                                        type="button"
+                                        onClick={() => setCategory(cat.name)}
+                                        className={clsx(
+                                            "px-3 py-1.5 rounded-lg text-sm font-medium border transition-all whitespace-nowrap flex items-center gap-2",
+                                            category === cat.name
+                                                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+                                                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                                        )}
+                                    >
+                                        <span>{cat.name}</span>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Receiver & Shared Toggle */}

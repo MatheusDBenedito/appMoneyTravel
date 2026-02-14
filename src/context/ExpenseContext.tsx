@@ -1,30 +1,31 @@
 
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Wallet, Transaction, ExchangeTransaction, WalletType, Trip } from '../types';
+import type { Wallet, Transaction, ExchangeTransaction, WalletType, Trip, Category } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface ExpenseContextType {
     wallets: Wallet[];
     transactions: Transaction[];
     exchanges: ExchangeTransaction[];
-    categories: string[];
+    categories: Category[];
     autoSharedCategories: string[];
     paymentMethods: string[];
     trips: Trip[];
     currentTripId: string | null;
     isLoading: boolean;
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ data?: any; error?: any }>;
-    updateTransaction: (transaction: Transaction) => Promise<{ error: any }>;
-    removeTransaction: (id: string) => Promise<void>;
+    updateTransaction: (transaction: Transaction) => Promise<{ error?: any }>;
+    removeTransaction: (id: string) => Promise<{ error?: any }>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
     removeExchange: (id: string) => Promise<void>;
-    addWallet: (name: string, avatarUrl?: string, includedInDivision?: boolean) => Promise<{ data?: Wallet, error?: any }>;
-    removeWallet: (id: string) => Promise<void>;
-    updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error: any }>;
-    updateWalletDivision: (id: string, includedInDivision: boolean) => Promise<{ error: any }>;
+    addWallet: (name: string, budget: number, avatar_url?: string, includedInDivision?: boolean) => Promise<{ data?: any, error?: any }>;
+    updateWallet: (id: string, updates: Partial<Wallet>) => Promise<{ error?: any }>;
+    removeWallet: (id: string) => Promise<{ error?: any }>;
+    updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error?: any }>;
+    updateWalletDivision: (id: string, includedInDivision: boolean) => Promise<{ error?: any }>;
     uploadAvatar: (file: File) => Promise<string | null>;
-    addCategory: (name: string) => Promise<void>;
+    addCategory: (name: string, icon?: string) => Promise<{ error?: any }>;
     removeCategory: (name: string) => Promise<void>;
     renameCategory: (oldName: string, newName: string) => Promise<void>;
     renameWallet: (id: string, newName: string) => Promise<void>;
@@ -54,7 +55,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Loading state to prevent premature rendering
     const [isLoading, setIsLoading] = useState(true);
 
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [autoSharedCategories, setAutoSharedCategories] = useState<string[]>([]);
     const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
 
@@ -126,7 +127,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                     }));
                     setExchanges(mappedExchanges);
                 }
-                if (categoriesData) setCategories(categoriesData.map((c: any) => c.name));
+                if (categoriesData) setCategories(categoriesData.map((c: any) => ({ name: c.name, icon: c.icon || 'Wallet' })));
                 if (autoSharedData) setAutoSharedCategories(autoSharedData.map((s: any) => s.category_name));
                 if (paymentMethodsData) setPaymentMethods(paymentMethodsData.map((p: any) => p.name));
             } else {
@@ -195,13 +196,13 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     // Actually, `fetchInitialData` handles everything. Let's make it depend on `currentTripId`?
     // See replacement below.
 
-    const addWallet = async (name: string, avatarUrl?: string, includedInDivision: boolean = true) => {
+    const addWallet = async (name: string, budget: number, avatarUrl?: string, includedInDivision: boolean = true) => {
         if (!currentTripId) return { error: 'No trip selected' };
 
         try {
             const newWallet = {
                 name,
-                budget: 0,
+                budget,
                 avatar_url: avatarUrl,
                 included_in_division: includedInDivision,
                 trip_id: currentTripId
@@ -221,6 +222,14 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             return { error };
         }
         return { error: 'Unknown error adding wallet' }; // Should not be reached
+    };
+
+    const updateWallet = async (id: string, updates: Partial<Wallet>) => {
+        const { error } = await supabase.from('wallets').update(updates).eq('id', id);
+        if (!error) {
+            setWallets(prev => prev.map(w => w.id === id ? { ...w, ...updates } : w));
+        }
+        return { error };
     };
 
     const updateWalletAvatar = async (id: string, avatarUrl: string) => {
@@ -269,6 +278,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (!error) {
             setWallets(prev => prev.filter(w => w.id !== id));
         }
+        return { error: null }; // or return { error }
     };
 
     const renameWallet = async (id: string, newName: string) => {
@@ -278,12 +288,16 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
-    const addCategory = async (name: string) => {
-        if (!currentTripId) return;
-        if (categories.includes(name)) return;
-        const { error } = await supabase.from('categories').insert([{ name, trip_id: currentTripId }]);
-        if (!error) {
-            setCategories(prev => [...prev, name]);
+    const addCategory = async (name: string, icon: string = 'Wallet') => {
+        if (!currentTripId) return { error: 'No trip selected' };
+        try {
+            const { error } = await supabase.from('categories').insert([{ name, trip_id: currentTripId, icon }]);
+            if (error) throw error;
+            setCategories(prev => [...prev, { name, icon }]);
+            return { error: null };
+        } catch (error) {
+            console.error('Error adding category:', error);
+            return { error };
         }
     };
 
@@ -291,14 +305,14 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (!currentTripId) return;
         const { error } = await supabase.from('categories').delete().eq('name', name).eq('trip_id', currentTripId);
         if (!error) {
-            setCategories(prev => prev.filter(c => c !== name));
+            setCategories(prev => prev.filter(c => c.name !== name));
             setAutoSharedCategories(prev => prev.filter(c => c !== name));
         }
     };
 
     const renameCategory = async (oldName: string, newName: string) => {
         if (!currentTripId) return;
-        if (categories.includes(newName)) return;
+        if (categories.some(c => c.name === newName)) return;
 
         // 1. Create new category
         const { error: createError } = await supabase.from('categories').insert([{ name: newName, trip_id: currentTripId }]);
@@ -319,7 +333,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         await supabase.from('categories').delete().eq('name', oldName).eq('trip_id', currentTripId);
 
         // Refresh local state fully to be safe, or manually map
-        setCategories(prev => prev.map(c => c === oldName ? newName : c));
+        setCategories(prev => prev.map(c => c.name === oldName ? { ...c, name: newName } : c));
         setAutoSharedCategories(prev => prev.map(c => c === oldName ? newName : c));
         setTransactions(prev => prev.map(t => t.category === oldName ? { ...t, category: newName } : t));
     };
@@ -562,6 +576,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (!error) {
             setTransactions(prev => prev.filter(t => t.id !== id));
         }
+        return { error };
     };
 
     return (
@@ -585,6 +600,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             updateExchange,
             removeExchange,
             addWallet,
+            updateWallet,
             removeWallet,
             updateWalletAvatar,
             updateWalletDivision,
@@ -599,7 +615,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             paymentMethods,
             addPaymentMethod,
             removePaymentMethod,
-            renamePaymentMethod
+            renamePaymentMethod,
         }}>
             {children}
         </ExpenseContext.Provider>

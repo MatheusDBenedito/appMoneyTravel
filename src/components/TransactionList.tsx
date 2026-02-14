@@ -1,34 +1,23 @@
 import React from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { clsx } from 'clsx';
-import { ShoppingBag, Coffee, Home, Car, Film, Wallet } from 'lucide-react';
-import type { Transaction, Category } from '../types';
+import type { Transaction } from '../types';
 
 interface TransactionListProps {
     limit?: number;
     onTransactionClick?: (transaction: Transaction) => void;
 }
 
-const CATEGORY_ICONS: Record<Category, React.ReactNode> = {
-    'General': <Wallet size={18} />,
-    'Food': <Coffee size={18} />,
-    'Transport': <Car size={18} />,
-    'Home': <Home size={18} />,
-    'Shopping': <ShoppingBag size={18} />,
-    'Entertainment': <Film size={18} />,
-};
-
-const CATEGORY_COLORS: Record<Category, string> = {
-    'General': 'bg-gray-100 text-gray-600',
-    'Food': 'bg-orange-100 text-orange-600',
-    'Transport': 'bg-blue-100 text-blue-600',
-    'Home': 'bg-green-100 text-green-600',
-    'Shopping': 'bg-purple-100 text-purple-600',
-    'Entertainment': 'bg-red-100 text-red-600',
-};
+import { getIcon } from '../utils/iconMap';
 
 const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionClick }) => {
-    const { transactions, wallets } = useExpenses();
+    const { transactions, wallets, categories } = useExpenses();
+
+    const getCategoryIcon = (categoryName: string) => {
+        const category = categories.find(c => c.name === categoryName);
+        const IconComponent = category ? getIcon(category.icon) : getIcon('Wallet');
+        return <IconComponent size={18} />;
+    };
 
     const displayTransactions = limit ? transactions.slice(0, limit) : transactions;
 
@@ -54,8 +43,8 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                         )}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={clsx("p-2 rounded-full", CATEGORY_COLORS[t.category])}>
-                                {CATEGORY_ICONS[t.category]}
+                            <div className={clsx("p-2 rounded-full bg-gray-100 text-gray-600")}>
+                                {getCategoryIcon(t.category)}
                             </div>
                             <div>
                                 <p className="font-medium text-gray-800">{t.description}</p>
@@ -102,8 +91,8 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                                 </div>
                             </div>
                         </div>
-                        <span className="font-bold text-gray-800">
-                            -${t.amount.toFixed(2)}
+                        <span className={clsx("font-bold", t.type === 'income' ? "text-green-600" : "text-gray-800")}>
+                            {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
                         </span>
                     </div>
                 );

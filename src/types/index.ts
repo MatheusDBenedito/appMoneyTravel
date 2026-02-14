@@ -17,14 +17,17 @@ export interface Trip {
     user_id?: string;
 }
 
-export type Category = string;
+export interface Category {
+    name: string;
+    icon: string;
+}
 
 export interface Transaction {
     id: string;
     description: string;
     amount: number;
     date: Date;
-    category: Category;
+    category: string; // Category name
     payer: WalletType;
     isShared: boolean;
     paymentMethod?: string; // e.g., 'Credit', 'Debit', 'Cash', 'Pix'

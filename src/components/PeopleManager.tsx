@@ -62,7 +62,7 @@ export default function PeopleManager() {
             if (url) avatarUrl = url;
         }
 
-        await addWallet(newName.trim(), avatarUrl, includedInDivision);
+        await addWallet(newName.trim(), 0, avatarUrl, includedInDivision);
         setNewName('');
         setFile(null);
         setIncludedInDivision(true); // Reset to default
