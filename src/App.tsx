@@ -92,6 +92,22 @@ function AppContent() {
               </h1>
               <p className="text-gray-500 text-sm">Gerencie seus gastos de viagem</p>
             </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsReturnModalOpen(true)}
+                className="bg-white text-green-600 border border-green-200 px-4 py-3 rounded-xl hover:bg-green-50 hover:border-green-300 transition-all flex items-center gap-2 font-medium"
+              >
+                <ArrowRightLeft size={20} />
+                Devolução
+              </button>
+              <button
+                onClick={() => handleOpenModal()}
+                className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all flex items-center gap-2 font-medium"
+              >
+                <Plus size={20} />
+                Nova Despesa
+              </button>
+            </div>
           </header>
 
           {/* Main Content Area */}
