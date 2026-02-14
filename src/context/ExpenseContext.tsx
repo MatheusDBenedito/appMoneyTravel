@@ -1,4 +1,4 @@
-```
+
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { Wallet, Transaction, ExchangeTransaction, WalletType, Category, PaymentMethod, Trip } from '../types';
 import { supabase } from '../lib/supabase';
@@ -13,7 +13,7 @@ interface ExpenseContextType {
     trips: Trip[];
     currentTripId: string | null;
     isLoading: boolean;
-    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ error: any }>;
+    addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ data?: any; error?: any }>;
     updateTransaction: (transaction: Transaction) => Promise<{ error: any }>;
     removeTransaction: (id: string) => Promise<void>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
@@ -44,7 +44,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [wallets, setWallets] = useState<Wallet[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [exchanges, setExchanges] = useState<ExchangeTransaction[]>([]);
-    
+
     // Trip State
     const [trips, setTrips] = useState<Trip[]>([]);
     const [currentTripId, setCurrentTripId] = useState<string | null>(() => localStorage.getItem('moneytravel_trip_id'));
@@ -71,9 +71,9 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 .from('trips')
                 .select('*')
                 .order('created_at', { ascending: false });
-            
+
             if (tripsError) throw tripsError;
-            
+
             const loadedTrips = tripsData || [];
             setTrips(loadedTrips);
 
@@ -87,7 +87,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
             // If still no trip (e.g. no trips exist, creating first one handled elsewhere or empty state), stop here?
             // Actually, migration creates a default one.
-            
+
             if (activeTripId) {
                 // Fetch Data for Active Trip
                 const { data: walletsData } = await supabase.from('wallets').select('*').eq('trip_id', activeTripId).order('created_at');
@@ -145,7 +145,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     // --- Trip Management ---
-    
+
     const createTrip = async (name: string) => {
         const { data, error } = await supabase.from('trips').insert([{ name }]).select().single();
         if (error) {
@@ -165,7 +165,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // We should break it up or just call it here.
         // Better: Make fetch depend on currentTripId in a useEffect.
     };
-    
+
     // We need to refactor useEffect slightly to re-fetch when trip changes.
     // For now, let's just create a separate effect for data fetching when ID changes.
     // Actually, `fetchInitialData` handles everything. Let's make it depend on `currentTripId`?
@@ -173,12 +173,12 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     const addWallet = async (name: string, avatarUrl?: string, includedInDivision: boolean = true) => {
         if (!currentTripId) return { error: 'No trip selected' };
-        
+
         try {
-            const newWallet = { 
-                name, 
-                budget: 0, 
-                avatar_url: avatarUrl, 
+            const newWallet = {
+                name,
+                budget: 0,
+                avatar_url: avatarUrl,
                 included_in_division: includedInDivision,
                 trip_id: currentTripId
             };
@@ -222,8 +222,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const uploadAvatar = async (file: File) => {
         try {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${ Math.random() }.${ fileExt } `;
-            const filePath = `${ fileName } `;
+            const fileName = `${Math.random()}.${fileExt} `;
+            const filePath = `${fileName} `;
 
             const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
 
@@ -350,7 +350,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
         if (!currentTripId) return { error: 'No trip selected' };
-        
+
         try {
             const dbTransaction = {
                 description: transaction.description,
@@ -362,9 +362,9 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 payment_method: transaction.paymentMethod,
                 trip_id: currentTripId
             };
-            
+
             const { data, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
-            
+
             if (error) throw error;
             if (data) {
                 const newTx = { ...transaction, id: data.id };
@@ -374,8 +374,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         } catch (error) {
             console.error('Error adding transaction:', error);
             // showToast('Erro ao salvar despesa', 'error'); // Assuming showToast is defined elsewhere
-            return { error };
         }
+        return { error: 'Unknown error adding transaction' };
     };
 
     const addExchange = async (exchange: Omit<ExchangeTransaction, 'id'>) => {
