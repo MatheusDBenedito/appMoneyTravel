@@ -1,6 +1,6 @@
 
-
-import { Home, DollarSign, Settings, Wallet, PieChart } from 'lucide-react';
+import { useExpenses } from '../context/ExpenseContext'; // Import context
+import { Home, DollarSign, Settings, Wallet, PieChart, Map, PlusCircle } from 'lucide-react';
 
 
 interface SidebarProps {
@@ -10,6 +10,23 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
+    const { trips, currentTripId, switchTrip, createTrip } = useExpenses(); // Get trip data
+
+    const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value;
+        if (val === 'new_trip') {
+            const name = window.prompt("Nome da nova viagem:");
+            if (name) {
+                const id = await createTrip(name);
+                if (id) switchTrip(id);
+            }
+        } else {
+            switchTrip(val);
+        }
+    };
+
+    const currentTrip = trips.find(t => t.id === currentTripId);
+
     const menuItems = [
         { id: 'dashboard', label: 'Visão Geral', icon: Home },
         { id: 'reports', label: 'Relatórios', icon: PieChart },
@@ -20,13 +37,33 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
 
     return (
         <aside className={`bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 ${className}`}>
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-6 border-b border-gray-100 space-y-4">
                 <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
                     <span className="bg-blue-600 text-white p-1 rounded-lg">
-                        <DollarSign size={20} />
+                        <Map size={20} />
                     </span>
                     MoneyTravel
                 </h1>
+
+                {/* Trip Selector */}
+                <div className="relative">
+                    <select
+                        value={currentTripId || ''}
+                        onChange={handleTripChange}
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 px-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-sm truncate"
+                    >
+                        {trips.map(trip => (
+                            <option key={trip.id} value={trip.id}>
+                                ✈️ {trip.name}
+                            </option>
+                        ))}
+                        <option disabled>──────────</option>
+                        <option value="new_trip">➕ Nova Viagem...</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                    </div>
+                </div>
             </div>
 
             <nav className="flex-1 p-4 space-y-2">

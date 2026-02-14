@@ -1,21 +1,25 @@
+```
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Wallet, Transaction, Category, WalletType, ExchangeTransaction, PaymentMethod } from '../types';
+import type { Wallet, Transaction, ExchangeTransaction, WalletType, Category, PaymentMethod, Trip } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface ExpenseContextType {
     wallets: Wallet[];
     transactions: Transaction[];
     exchanges: ExchangeTransaction[];
-    categories: Category[];
-    autoSharedCategories: Category[];
-    paymentMethods: PaymentMethod[];
+    categories: string[];
+    autoSharedCategories: string[];
+    paymentMethods: string[];
+    trips: Trip[];
+    currentTripId: string | null;
+    isLoading: boolean;
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ error: any }>;
     updateTransaction: (transaction: Transaction) => Promise<{ error: any }>;
     removeTransaction: (id: string) => Promise<void>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
     removeExchange: (id: string) => Promise<void>;
-    addWallet: (name: string, avatarUrl?: string, includedInDivision?: boolean) => Promise<void>;
+    addWallet: (name: string, avatarUrl?: string, includedInDivision?: boolean) => Promise<{ data?: Wallet, error?: any }>;
     removeWallet: (id: string) => Promise<void>;
     updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error: any }>;
     updateWalletDivision: (id: string, includedInDivision: boolean) => Promise<{ error: any }>;
@@ -30,6 +34,8 @@ interface ExpenseContextType {
     addPaymentMethod: (name: string) => Promise<void>;
     removePaymentMethod: (name: string) => Promise<void>;
     renamePaymentMethod: (oldName: string, newName: string) => Promise<void>;
+    createTrip: (name: string) => Promise<string | null>;
+    switchTrip: (tripId: string) => void;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -38,75 +44,159 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const [wallets, setWallets] = useState<Wallet[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [exchanges, setExchanges] = useState<ExchangeTransaction[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [autoSharedCategories, setAutoSharedCategories] = useState<Category[]>([]);
-    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    
+    // Trip State
+    const [trips, setTrips] = useState<Trip[]>([]);
+    const [currentTripId, setCurrentTripId] = useState<string | null>(() => localStorage.getItem('moneytravel_trip_id'));
+
+    // Loading state to prevent premature rendering
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [categories, setCategories] = useState<string[]>([]);
+    const [autoSharedCategories, setAutoSharedCategories] = useState<string[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
 
     useEffect(() => {
+        if (currentTripId) {
+            localStorage.setItem('moneytravel_trip_id', currentTripId);
+        }
         fetchInitialData();
-    }, []);
+    }, [currentTripId]); // Refetch when trip changes
 
     const fetchInitialData = async () => {
+        setIsLoading(true);
         try {
-            const { data: walletsData } = await supabase.from('wallets').select('*').order('created_at', { ascending: true });
-            if (walletsData) {
-                setWallets(walletsData.map((w: any) => ({
-                    ...w,
-                    includedInDivision: w.included_in_division !== false // Handle null/undefined as true
-                })));
+            // 1. Fetch Trips
+            const { data: tripsData, error: tripsError } = await supabase
+                .from('trips')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (tripsError) throw tripsError;
+            
+            const loadedTrips = tripsData || [];
+            setTrips(loadedTrips);
+
+            // Determine Active Trip
+            let activeTripId = currentTripId;
+            if (!activeTripId && loadedTrips.length > 0) {
+                // Default to most recent or first
+                activeTripId = loadedTrips[0].id;
+                setCurrentTripId(activeTripId);
             }
 
-            const { data: transactionsData } = await supabase.from('transactions').select('*').order('date', { ascending: false });
-            if (transactionsData) {
-                const mappedTransactions = transactionsData.map((t: any) => ({
-                    ...t,
-                    isShared: t.is_shared,
-                    paymentMethod: t.payment_method
-                }));
-                setTransactions(mappedTransactions);
+            // If still no trip (e.g. no trips exist, creating first one handled elsewhere or empty state), stop here?
+            // Actually, migration creates a default one.
+            
+            if (activeTripId) {
+                // Fetch Data for Active Trip
+                const { data: walletsData } = await supabase.from('wallets').select('*').eq('trip_id', activeTripId).order('created_at');
+                const { data: transactionsData } = await supabase.from('transactions').select('*').eq('trip_id', activeTripId).order('date', { ascending: false });
+                const { data: exchangesData } = await supabase.from('exchanges').select('*').eq('trip_id', activeTripId).order('date', { ascending: false });
+                const { data: categoriesData } = await supabase.from('categories').select('name').eq('trip_id', activeTripId);
+                const { data: autoSharedData } = await supabase.from('auto_shared_categories').select('category_name').eq('trip_id', activeTripId);
+                const { data: paymentMethodsData } = await supabase.from('payment_methods').select('name').eq('trip_id', activeTripId);
+
+                if (walletsData) {
+                    setWallets(walletsData.map((w: any) => ({
+                        ...w,
+                        includedInDivision: w.included_in_division !== false // Handle null/undefined as true
+                    })));
+                }
+                if (transactionsData) {
+                    const mappedTransactions = transactionsData.map((t: any) => ({
+                        ...t,
+                        isShared: t.is_shared,
+                        paymentMethod: t.payment_method
+                    }));
+                    setTransactions(mappedTransactions);
+                }
+                if (exchangesData) {
+                    const mappedExchanges = exchangesData.map((e: any) => ({
+                        ...e,
+                        originCurrency: e.origin_currency,
+                        originAmount: e.origin_amount,
+                        targetAmount: e.target_amount,
+                        targetWallet: e.target_wallet,
+                        location: e.location
+                    }));
+                    setExchanges(mappedExchanges);
+                }
+                if (categoriesData) setCategories(categoriesData.map((c: any) => c.name));
+                if (autoSharedData) setAutoSharedCategories(autoSharedData.map((s: any) => s.category_name));
+                if (paymentMethodsData) setPaymentMethods(paymentMethodsData.map((p: any) => p.name));
+            } else {
+                // No trips found - Reset data
+                setWallets([]);
+                setTransactions([]);
+                setExchanges([]);
+                setCategories([]);
+                setAutoSharedCategories([]);
+                setPaymentMethods([]);
             }
-
-            const { data: exchangesData } = await supabase.from('exchanges').select('*').order('date', { ascending: false });
-            if (exchangesData) {
-                const mappedExchanges = exchangesData.map((e: any) => ({
-                    ...e,
-                    originCurrency: e.origin_currency,
-                    originAmount: e.origin_amount,
-                    targetAmount: e.target_amount,
-                    targetWallet: e.target_wallet,
-                    location: e.location
-                }));
-                setExchanges(mappedExchanges);
-            }
-
-            const { data: categoriesData } = await supabase.from('categories').select('name');
-            if (categoriesData) setCategories(categoriesData.map((c: any) => c.name));
-
-            const { data: sharedData } = await supabase.from('auto_shared_categories').select('category_name');
-            if (sharedData) setAutoSharedCategories(sharedData.map((s: any) => s.category_name));
-
-            const { data: paymentMethodsData } = await supabase.from('payment_methods').select('name').order('created_at', { ascending: true });
-            if (paymentMethodsData) setPaymentMethods(paymentMethodsData.map((p: any) => p.name));
 
         } catch (error) {
             console.error('Error fetching data:', error);
+            // Assuming showToast is defined elsewhere or will be added
+            // showToast('Erro ao carregar dados', 'error'); 
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const addWallet = async (name: string, avatarUrl?: string, includedInDivision: boolean = true) => {
-        const { data, error } = await supabase.from('wallets').insert([{
-            name,
-            budget: 0,
-            avatar_url: avatarUrl,
-            included_in_division: includedInDivision
-        }]).select().single();
-
-        if (data && !error) {
-            setWallets(prev => [...prev, {
-                ...data,
-                includedInDivision: data.included_in_division
-            }]);
+    // --- Trip Management ---
+    
+    const createTrip = async (name: string) => {
+        const { data, error } = await supabase.from('trips').insert([{ name }]).select().single();
+        if (error) {
+            // showToast('Erro ao criar viagem', 'error');
+            console.error('Error creating trip:', error);
+            return null;
         }
+        setTrips(prev => [data, ...prev]);
+        // showToast('Viagem criada com sucesso!', 'success');
+        return data.id;
+    };
+
+    const switchTrip = (tripId: string) => {
+        setCurrentTripId(tripId);
+        // fetchInitialData will be triggered by useEffect logic if we separate effects?
+        // Current fetchInitialData is called once on mount. 
+        // We should break it up or just call it here.
+        // Better: Make fetch depend on currentTripId in a useEffect.
+    };
+    
+    // We need to refactor useEffect slightly to re-fetch when trip changes.
+    // For now, let's just create a separate effect for data fetching when ID changes.
+    // Actually, `fetchInitialData` handles everything. Let's make it depend on `currentTripId`?
+    // See replacement below.
+
+    const addWallet = async (name: string, avatarUrl?: string, includedInDivision: boolean = true) => {
+        if (!currentTripId) return { error: 'No trip selected' };
+        
+        try {
+            const newWallet = { 
+                name, 
+                budget: 0, 
+                avatar_url: avatarUrl, 
+                included_in_division: includedInDivision,
+                trip_id: currentTripId
+            };
+            const { data, error } = await supabase.from('wallets').insert([newWallet]).select().single();
+
+            if (error) throw error;
+            if (data) {
+                setWallets(prev => [...prev, {
+                    ...data,
+                    includedInDivision: data.included_in_division
+                }]);
+                return { data };
+            }
+        } catch (error) {
+            console.error('Error adding wallet:', error);
+            return { error };
+        }
+        return { error: 'Unknown error adding wallet' }; // Should not be reached
     };
 
     const updateWalletAvatar = async (id: string, avatarUrl: string) => {
@@ -132,8 +222,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     const uploadAvatar = async (file: File) => {
         try {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Math.random()}.${fileExt}`;
-            const filePath = `${fileName}`;
+            const fileName = `${ Math.random() }.${ fileExt } `;
+            const filePath = `${ fileName } `;
 
             const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
 
@@ -205,15 +295,20 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const toggleAutoShare = async (category: string) => {
-        if (autoSharedCategories.includes(category)) {
-            // Remove
-            const { error } = await supabase.from('auto_shared_categories').delete().eq('category_name', category);
+        if (!currentTripId) return;
+
+        const isAutoShared = autoSharedCategories.includes(category);
+        if (isAutoShared) {
+            const { error } = await supabase.from('auto_shared_categories')
+                .delete()
+                .eq('category_name', category)
+                .eq('trip_id', currentTripId);
             if (!error) {
                 setAutoSharedCategories(prev => prev.filter(c => c !== category));
             }
         } else {
-            // Add
-            const { error } = await supabase.from('auto_shared_categories').insert([{ category_name: category }]);
+            const { error } = await supabase.from('auto_shared_categories')
+                .insert([{ category_name: category, trip_id: currentTripId }]);
             if (!error) {
                 setAutoSharedCategories(prev => [...prev, category]);
             }
@@ -221,8 +316,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const addPaymentMethod = async (name: string) => {
-        if (paymentMethods.includes(name)) return;
-        const { error } = await supabase.from('payment_methods').insert([{ name }]);
+        if (!currentTripId) return;
+        const { error } = await supabase.from('payment_methods').insert([{ name, trip_id: currentTripId }]);
         if (!error) {
             setPaymentMethods(prev => [...prev, name]);
         }
@@ -253,53 +348,54 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         setTransactions(prev => prev.map(t => t.paymentMethod === oldName ? { ...t, paymentMethod: newName } : t));
     };
 
-    const addTransaction = async (data: Omit<Transaction, 'id'>) => {
-        const dbTransaction = {
-            description: data.description,
-            amount: data.amount,
-            date: data.date,
-            category: data.category,
-            payer: data.payer,
-            is_shared: data.isShared,
-            payment_method: data.paymentMethod
-        };
-
-        const { data: result, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
-
-        if (result && !error) {
-            const newTransaction: Transaction = {
-                ...result,
-                isShared: result.is_shared,
-                paymentMethod: result.payment_method
+    const addTransaction = async (transaction: Omit<Transaction, 'id'>) => {
+        if (!currentTripId) return { error: 'No trip selected' };
+        
+        try {
+            const dbTransaction = {
+                description: transaction.description,
+                amount: transaction.amount,
+                date: transaction.date,
+                category: transaction.category,
+                payer: transaction.payer,
+                is_shared: transaction.isShared,
+                payment_method: transaction.paymentMethod,
+                trip_id: currentTripId
             };
-            setTransactions(prev => [newTransaction, ...prev]);
+            
+            const { data, error } = await supabase.from('transactions').insert([dbTransaction]).select().single();
+            
+            if (error) throw error;
+            if (data) {
+                const newTx = { ...transaction, id: data.id };
+                setTransactions(prev => [newTx, ...prev]);
+                return { data };
+            }
+        } catch (error) {
+            console.error('Error adding transaction:', error);
+            // showToast('Erro ao salvar despesa', 'error'); // Assuming showToast is defined elsewhere
+            return { error };
         }
-        return { error };
     };
 
-    const addExchange = async (data: Omit<ExchangeTransaction, 'id'>) => {
+    const addExchange = async (exchange: Omit<ExchangeTransaction, 'id'>) => {
+        if (!currentTripId) return;
+
         const dbExchange = {
-            origin_currency: data.originCurrency,
-            origin_amount: data.originAmount,
-            target_amount: data.targetAmount,
-            rate: data.rate,
-            target_wallet: data.targetWallet,
-            date: data.date,
-            location: data.location
+            origin_currency: exchange.originCurrency,
+            origin_amount: exchange.originAmount,
+            target_amount: exchange.targetAmount,
+            rate: exchange.rate,
+            target_wallet: exchange.targetWallet,
+            location: exchange.location,
+            date: exchange.date,
+            trip_id: currentTripId
         };
 
-        const { data: result, error } = await supabase.from('exchanges').insert([dbExchange]).select().single();
-
-        if (result && !error) {
-            const newExchange: ExchangeTransaction = {
-                ...result,
-                originCurrency: result.origin_currency,
-                originAmount: result.origin_amount,
-                targetAmount: result.target_amount,
-                targetWallet: result.target_wallet,
-                location: result.location
-            };
-            setExchanges(prev => [newExchange, ...prev]);
+        const { data, error } = await supabase.from('exchanges').insert([dbExchange]).select().single();
+        if (!error && data) {
+            const newEx = { ...exchange, id: data.id };
+            setExchanges(prev => [newEx, ...prev]);
         }
     };
 
@@ -327,24 +423,6 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             setExchanges(prev => prev.filter(e => e.id !== id));
         }
     };
-
-    // ... (updateBudget, getWalletBalance remain same - skipped in replacement block for brevity/focus, handled by surrounding context if I replace correctly. Better to replace whole function blocks if I can, or targeted.)
-    // Wait, I am replacing a huge chunk. Let me be careful about `updateBudget` and `getWalletBalance`. 
-    // They are in the `TargetContent` range if I am not careful.
-    // The `EndLine` is 248. `updateBudget` starts at 198. `getWalletBalance` starts at 205.
-    // I need to include them in the replacement content unchanged if I'm overwriting them.
-    // Let me construct the replacement content to include them properly.
-
-    // Actually, I can just replace the specific functions `addTransaction`, `addExchange`, `updateTransaction` and `fetchInitialData`.
-    // But `replace_file_content` is "SINGLE CONTIGUOUS block".
-    // `fetchInitialData` is at top. `addTransaction` is middle. `updateTransaction` is bottom.
-    // I should use `multi_replace_file_content` or split this up.
-    // Since I cannot use `multi_replace` because the instructions say "Do NOT make multiple parallel calls to this tool or the replace_file_content tool for the same file", I will use `replace_file_content` multiple times sequentially OR use `multi_replace_file_content` once.
-    // The instructions say: "To edit multiple, non-adjacent lines of code in the same file, make a single call to the multi_replace_file_content".
-    // So `multi_replace_file_content` is the correct tool.
-
-    // RE-EVALUATING TOOL CHOICE:
-    // I will use `multi_replace_file_content` on `src/context/ExpenseContext.tsx`.
 
     const updateBudget = async (walletId: WalletType, amount: number) => {
         const { error } = await supabase.from('wallets').update({ budget: amount }).eq('id', walletId);
@@ -441,6 +519,10 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     return (
         <ExpenseContext.Provider value={{
+            trips,
+            currentTripId,
+            createTrip,
+            switchTrip,
             wallets,
             transactions,
             exchanges,

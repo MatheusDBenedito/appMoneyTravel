@@ -7,6 +7,14 @@ export interface Wallet {
     avatar_url?: string;
     includedInDivision: boolean;
     created_at?: string;
+    trip_id?: string;
+}
+
+export interface Trip {
+    id: string;
+    name: string;
+    created_at: string;
+    user_id?: string;
 }
 
 export type Category = string;
@@ -20,6 +28,7 @@ export interface Transaction {
     payer: WalletType;
     isShared: boolean;
     paymentMethod?: string; // e.g., 'Credit', 'Debit', 'Cash', 'Pix'
+    trip_id?: string;
 }
 
 export interface ExchangeTransaction {
@@ -31,6 +40,7 @@ export interface ExchangeTransaction {
     rate: number;
     targetWallet: WalletType | 'both';
     location?: string; // e.g., 'Wise', 'Western Union', 'Exchange Office'
+    trip_id?: string;
 }
 
 export type PaymentMethod = string;
@@ -40,4 +50,6 @@ export interface AppState {
     transactions: Transaction[];
     exchanges: ExchangeTransaction[];
     paymentMethods: PaymentMethod[];
+    trips: Trip[];
+    currentTripId: string | null;
 }
