@@ -13,12 +13,13 @@ interface AddReturnModalProps {
 }
 
 const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initialData }) => {
-    const { wallets, addTransaction, updateTransaction, removeTransaction } = useExpenses();
+    const { wallets, categories, addTransaction, updateTransaction, removeTransaction } = useExpenses();
     const { showToast } = useToast();
 
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
     const [receiver, setReceiver] = useState<WalletType>(wallets[0]?.id || '');
+    const [category, setCategory] = useState('');
     const [isShared, setIsShared] = useState(false);
 
     // Confirm Modal State
@@ -31,24 +32,27 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             setDescription(initialData.description);
             setReceiver(initialData.payer); // In returns, payer field stores the receiver
             setIsShared(initialData.isShared);
+            setCategory(initialData.category);
+        } else {
+            // Default to first category available
+            if (categories.length > 0) {
+                // Try to find 'General' or 'Outros', otherwise first one
+                const defaultCat = categories.find(c => c === 'Geral' || c === 'General' || c === 'Outros') || categories[0];
+                setCategory(defaultCat);
+            }
         }
-    }, [initialData]);
+    }, [initialData, categories]);
 
-    // Auto-select first wallet if receiver is empty (e.g. on load)
-    useEffect(() => {
-        if (!receiver && wallets.length > 0 && !initialData) {
-            setReceiver(wallets[0].id);
-        }
-    }, [wallets, receiver, initialData]);
+    // ... (receiver effect) ...
 
     const handleSubmit = async () => {
-        if (!amount || !description) return;
+        if (!amount || !description || !category) return;
 
         try {
             const transactionData = {
                 amount: parseFloat(amount),
                 description,
-                category: 'General', // Default category for returns
+                category,
                 payer: receiver, // We use 'payer' field to store who received the money
                 isShared,
                 paymentMethod: 'Cash', // Default
@@ -140,16 +144,16 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                         {/* Receiver & Shared Toggle */}
                         <div className="p-4 bg-gray-50 rounded-xl space-y-4">
 
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col gap-2">
                                 <span className="text-sm font-medium text-gray-600">Recebido por</span>
-                                <div className="flex bg-white rounded-lg p-1 border shadow-sm">
+                                <div className="flex bg-white rounded-lg p-1 border shadow-sm overflow-x-auto no-scrollbar">
                                     {wallets.map(w => (
                                         <button
                                             key={w.id}
                                             type="button"
                                             onClick={() => setReceiver(w.id)}
                                             className={clsx(
-                                                "px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
+                                                "flex-1 px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
                                                 receiver === w.id ? "bg-green-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
                                             )}
                                         >
