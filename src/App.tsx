@@ -33,7 +33,7 @@ function App() {
         {/* Mobile Header (Blue) */}
         <header className="md:hidden bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg flex-shrink-0">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold">Travel Money</h1>
+            <h1 className="text-xl font-bold">MoneyTravel</h1>
             <button
               onClick={() => setActiveTab('settings')}
               className="p-2 hover:bg-blue-700 rounded-full transition-colors"
@@ -43,7 +43,7 @@ function App() {
           </div>
 
           <div className="text-center py-4 relative">
-            <p className="text-blue-100 text-sm mb-1">Total Balance</p>
+            <p className="text-blue-100 text-sm mb-1">Saldo Total</p>
             <div className="flex items-center justify-center gap-2">
               <h2 className="text-4xl font-bold">${totalBalance.toFixed(2)}</h2>
             </div>
@@ -153,7 +153,7 @@ function App() {
           className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600' : 'text-gray-400'}`}
         >
           <Home size={24} />
-          <span className="text-xs font-medium">Home</span>
+          <span className="text-xs font-medium">Início</span>
         </button>
 
         <div className="relative -top-5">

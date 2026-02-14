@@ -31,7 +31,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, balance }) => {
             </div>
 
             <div className="mt-2">
-                <p className="text-xs text-gray-500 mb-1">Remaining</p>
+                <p className="text-xs text-gray-500 mb-1">Saldo</p>
                 <p className={clsx(
                     "text-2xl font-bold",
                     balance < 0 ? "text-red-500" : "text-gray-800"

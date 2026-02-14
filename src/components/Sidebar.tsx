@@ -11,7 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: Home },
+        { id: 'dashboard', label: 'Visão Geral', icon: Home },
         { id: 'exchange', label: 'Câmbio', icon: DollarSign },
         { id: 'history', label: 'Histórico', icon: Wallet }, // Using Wallet icon for history as a placeholder or reuse existing icon logic
         { id: 'settings', label: 'Configurações', icon: Settings },

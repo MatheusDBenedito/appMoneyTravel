@@ -34,7 +34,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit }) => {
     if (transactions.length === 0) {
         return (
             <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed">
-                <p>No transactions yet</p>
+                <p>Nenhuma transação ainda</p>
             </div>
         );
     }
@@ -58,7 +58,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit }) => {
                                         "px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide",
                                         t.isShared ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"
                                     )}>
-                                        {t.isShared ? "Shared" : wallet?.name || "Personal"}
+                                        {t.isShared ? "Compartilhado" : wallet?.name || "Pessoal"}
                                     </span>
                                 </div>
                             </div>

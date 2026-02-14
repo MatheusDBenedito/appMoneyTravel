@@ -72,7 +72,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
             <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300">
 
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">New Expense</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Nova Despesa</h2>
                     <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
                         <X size={20} />
                     </button>
@@ -82,7 +82,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
 
                     {/* Amount Input */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Amount</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Valor</label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
                             <input
@@ -93,7 +93,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                                 onKeyDown={handleAmountKeyDown}
                                 onChange={(e) => setAmount(e.target.value)}
                                 className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="0.00"
+                                placeholder="0,00"
                                 autoFocus
                                 required
                             />
@@ -102,7 +102,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Descrição</label>
                         <input
                             ref={descriptionRef}
                             type="text"
@@ -110,14 +110,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                             onKeyDown={handleDescriptionKeyDown}
                             onChange={(e) => setDescription(e.target.value)}
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="What is it for?"
+                            placeholder="Qual a despesa?"
                             required
                         />
                     </div>
 
                     {/* Category */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Category</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1">Categoria</label>
                         <div className="grid grid-cols-3 gap-2">
                             {categories.map(cat => (
                                 <button
@@ -141,7 +141,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                     <div className="p-4 bg-gray-50 rounded-xl space-y-4">
 
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-600">Paid by</span>
+                            <span className="text-sm font-medium text-gray-600">Pago por</span>
                             <div className="flex bg-white rounded-lg p-1 border shadow-sm">
                                 {wallets.map(w => (
                                     <button
@@ -161,7 +161,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
 
                         <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-600">Split Cost (50/50)</span>
+                                <span className="text-sm font-medium text-gray-600">Dividir Custo (50/50)</span>
                                 {autoSharedCategories.includes(category) && (
                                     <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 rounded">Auto</span>
                                 )}
@@ -189,7 +189,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                         className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
                         <Check size={20} />
-                        Save Transaction
+                        Salvar Transação
                     </button>
 
                 </div>
