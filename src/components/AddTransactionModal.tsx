@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { X, Check } from 'lucide-react';
-import type { Category, WalletType } from '../types';
+import { X, Check, Trash2 } from 'lucide-react';
+import type { Category, WalletType, Transaction } from '../types';
 import { clsx } from 'clsx';
 
 interface AddTransactionModalProps {
     onClose: () => void;
+    initialData?: Transaction;
 }
 
-const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) => {
-    const { addTransaction, wallets, categories, autoSharedCategories } = useExpenses();
+const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, initialData }) => {
+    const { addTransaction, updateTransaction, removeTransaction, wallets, categories, autoSharedCategories } = useExpenses();
 
     const [amount, setAmount] = useState('');
     const [description, setDescription] = useState('');
@@ -20,36 +21,61 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
     // Refs for focus management
     const descriptionRef = useRef<HTMLInputElement>(null);
 
+    // Initialize state with initialData if provided
+    useEffect(() => {
+        if (initialData) {
+            setAmount(initialData.amount.toString());
+            setDescription(initialData.description);
+            setCategory(initialData.category);
+            setPayer(initialData.payer);
+            setIsShared(initialData.isShared);
+        }
+    }, [initialData]);
+
     // Auto-select first wallet if payer is empty (e.g. on load)
     useEffect(() => {
-        if (!payer && wallets.length > 0) {
+        if (!payer && wallets.length > 0 && !initialData) {
             setPayer(wallets[0].id);
         }
-    }, [wallets, payer]);
+    }, [wallets, payer, initialData]);
 
-    // Auto-toggle shared based on category
+    // Auto-toggle shared based on category (only for new transactions)
     useEffect(() => {
-        if (autoSharedCategories.includes(category)) {
-            setIsShared(true);
-        } else {
-            setIsShared(false);
+        if (!initialData) {
+            if (autoSharedCategories.includes(category)) {
+                setIsShared(true);
+            } else {
+                setIsShared(false);
+            }
         }
-    }, [category, autoSharedCategories]);
+    }, [category, autoSharedCategories, initialData]);
 
     const handleSubmit = () => {
-
         if (!amount || !description) return;
 
-        addTransaction({
+        const transactionData = {
             amount: parseFloat(amount),
             description,
             category,
             payer,
             isShared,
-            date: new Date(),
-        });
+            date: initialData ? initialData.date : new Date(),
+        };
+
+        if (initialData) {
+            updateTransaction({ ...transactionData, id: initialData.id });
+        } else {
+            addTransaction(transactionData);
+        }
 
         onClose();
+    };
+
+    const handleDelete = () => {
+        if (initialData && confirm('Tem certeza que deseja excluir esta transação?')) {
+            removeTransaction(initialData.id);
+            onClose();
+        }
     };
 
     const handleAmountKeyDown = (e: React.KeyboardEvent) => {
@@ -72,7 +98,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
             <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300">
 
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Nova Despesa</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        {initialData ? 'Editar Despesa' : 'Nova Despesa'}
+                    </h2>
                     <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
                         <X size={20} />
                     </button>
@@ -94,7 +122,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                                 onChange={(e) => setAmount(e.target.value)}
                                 className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="0,00"
-                                autoFocus
+                                autoFocus={!initialData} // Only autofocus on new
                                 required
                             />
                         </div>
@@ -162,7 +190,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                         <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-gray-600">Dividir Custo (50/50)</span>
-                                {autoSharedCategories.includes(category) && (
+                                {autoSharedCategories.includes(category) && !initialData && (
                                     <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 rounded">Auto</span>
                                 )}
                             </div>
@@ -183,14 +211,26 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
 
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={handleSubmit}
-                        className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
-                    >
-                        <Check size={20} />
-                        Salvar Transação
-                    </button>
+                    <div className="flex gap-3">
+                        {initialData && (
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="p-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 active:scale-95 transition-transform flex items-center justify-center"
+                                title="Excluir Transação"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={handleSubmit}
+                            className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                        >
+                            <Check size={20} />
+                            {initialData ? 'Salvar Alterações' : 'Salvar Transação'}
+                        </button>
+                    </div>
 
                 </div>
             </div>

@@ -2,10 +2,11 @@ import React from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { clsx } from 'clsx';
 import { ShoppingBag, Coffee, Home, Car, Film, Wallet } from 'lucide-react';
-import type { Category } from '../types';
+import type { Transaction, Category } from '../types';
 
 interface TransactionListProps {
     limit?: number;
+    onTransactionClick?: (transaction: Transaction) => void;
 }
 
 const CATEGORY_ICONS: Record<Category, React.ReactNode> = {
@@ -26,7 +27,7 @@ const CATEGORY_COLORS: Record<Category, string> = {
     'Entertainment': 'bg-red-100 text-red-600',
 };
 
-const TransactionList: React.FC<TransactionListProps> = ({ limit }) => {
+const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionClick }) => {
     const { transactions, wallets } = useExpenses();
 
     const displayTransactions = limit ? transactions.slice(0, limit) : transactions;
@@ -44,7 +45,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit }) => {
             {displayTransactions.map(t => {
                 const wallet = wallets.find(w => w.id === t.payer);
                 return (
-                    <div key={t.id} className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div
+                        key={t.id}
+                        onClick={() => onTransactionClick?.(t)}
+                        className={clsx(
+                            "bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between",
+                            onTransactionClick && "cursor-pointer hover:bg-gray-50 active:scale-[0.99] transition-all"
+                        )}
+                    >
                         <div className="flex items-center gap-3">
                             <div className={clsx("p-2 rounded-full", CATEGORY_COLORS[t.category])}>
                                 {CATEGORY_ICONS[t.category]}

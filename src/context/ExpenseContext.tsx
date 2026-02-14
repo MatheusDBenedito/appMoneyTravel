@@ -9,6 +9,8 @@ interface ExpenseContextType {
     categories: Category[];
     autoSharedCategories: Category[];
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
+    updateTransaction: (transaction: Transaction) => Promise<void>;
+    removeTransaction: (id: string) => Promise<void>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     addWallet: (name: string) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
@@ -229,6 +231,31 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         return balance;
     };
 
+    const updateTransaction = async (transaction: Transaction) => {
+        const dbTransaction = {
+            description: transaction.description,
+            amount: transaction.amount,
+            date: transaction.date,
+            category: transaction.category,
+            payer: transaction.payer,
+            is_shared: transaction.isShared
+        };
+
+        const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);
+
+        if (!error) {
+            setTransactions(prev => prev.map(t => t.id === transaction.id ? transaction : t));
+        }
+    };
+
+    const removeTransaction = async (id: string) => {
+        const { error } = await supabase.from('transactions').delete().eq('id', id);
+
+        if (!error) {
+            setTransactions(prev => prev.filter(t => t.id !== id));
+        }
+    };
+
     return (
         <ExpenseContext.Provider value={{
             wallets,
@@ -237,6 +264,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             categories,
             autoSharedCategories,
             addTransaction,
+            updateTransaction,
+            removeTransaction,
             addExchange,
             addWallet,
             removeWallet,

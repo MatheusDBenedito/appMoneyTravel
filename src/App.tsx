@@ -9,13 +9,25 @@ import ExchangeForm from './components/ExchangeForm';
 import PeopleManager from './components/PeopleManager';
 import CategoryManager from './components/CategoryManager';
 import WalletCard from './components/WalletCard';
+import type { Transaction } from './types'; // Import Transaction type
 
 function App() {
   const { wallets, getWalletBalance } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history'>('dashboard');
 
   const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
+
+  const handleOpenModal = (transaction?: Transaction) => {
+    setSelectedTransaction(transaction);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedTransaction(undefined);
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
@@ -61,7 +73,7 @@ function App() {
             <p className="text-gray-500 text-sm">Gerencie seus gastos de viagem</p>
           </div>
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => handleOpenModal()}
             className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all flex items-center gap-2 font-medium"
           >
             <Plus size={20} />
@@ -108,7 +120,7 @@ function App() {
                       Ver Tudo
                     </button>
                   </div>
-                  <TransactionList limit={5} />
+                  <TransactionList limit={5} onTransactionClick={handleOpenModal} />
                 </div>
               </div>
             </div>
@@ -139,7 +151,7 @@ function App() {
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-lg">Histórico Completo</h3>
               </div>
-              <TransactionList />
+              <TransactionList onTransactionClick={handleOpenModal} />
             </section>
           )}
 
@@ -148,7 +160,7 @@ function App() {
 
       {/* Mobile Floating Action Button (FAB) */}
       <button
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => handleOpenModal()}
         className="md:hidden fixed bottom-24 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-transform active:scale-95 z-50 flex items-center justify-center"
         aria-label="Nova Despesa"
       >
@@ -184,7 +196,7 @@ function App() {
 
       {/* Modals */}
       {isModalOpen && (
-        <AddTransactionModal onClose={() => setIsModalOpen(false)} />
+        <AddTransactionModal onClose={handleCloseModal} initialData={selectedTransaction} />
       )}
     </div>
   );
