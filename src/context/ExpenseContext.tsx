@@ -277,15 +277,17 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const addCategory = async (name: string) => {
+        if (!currentTripId) return;
         if (categories.includes(name)) return;
-        const { error } = await supabase.from('categories').insert([{ name }]);
+        const { error } = await supabase.from('categories').insert([{ name, trip_id: currentTripId }]);
         if (!error) {
             setCategories(prev => [...prev, name]);
         }
     };
 
     const removeCategory = async (name: string) => {
-        const { error } = await supabase.from('categories').delete().eq('name', name);
+        if (!currentTripId) return;
+        const { error } = await supabase.from('categories').delete().eq('name', name).eq('trip_id', currentTripId);
         if (!error) {
             setCategories(prev => prev.filter(c => c !== name));
             setAutoSharedCategories(prev => prev.filter(c => c !== name));
@@ -293,22 +295,26 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const renameCategory = async (oldName: string, newName: string) => {
+        if (!currentTripId) return;
         if (categories.includes(newName)) return;
 
         // 1. Create new category
-        const { error: createError } = await supabase.from('categories').insert([{ name: newName }]);
+        const { error: createError } = await supabase.from('categories').insert([{ name: newName, trip_id: currentTripId }]);
         if (createError) return;
 
         // 2. Update transactions
-        await supabase.from('transactions').update({ category: newName }).eq('category', oldName);
+        await supabase.from('transactions')
+            .update({ category: newName })
+            .eq('category', oldName)
+            .eq('trip_id', currentTripId);
 
         // 3. Update Auto Shared
         if (autoSharedCategories.includes(oldName)) {
-            await supabase.from('auto_shared_categories').insert([{ category_name: newName }]);
+            await supabase.from('auto_shared_categories').insert([{ category_name: newName, trip_id: currentTripId }]);
         }
 
-        // 4. Delete old category (Cascades delete to auto_shared, and transactions set null if missed, but we updated them)
-        await supabase.from('categories').delete().eq('name', oldName);
+        // 4. Delete old category
+        await supabase.from('categories').delete().eq('name', oldName).eq('trip_id', currentTripId);
 
         // Refresh local state fully to be safe, or manually map
         setCategories(prev => prev.map(c => c === oldName ? newName : c));
@@ -346,24 +352,29 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     };
 
     const removePaymentMethod = async (name: string) => {
-        const { error } = await supabase.from('payment_methods').delete().eq('name', name);
+        if (!currentTripId) return;
+        const { error } = await supabase.from('payment_methods').delete().eq('name', name).eq('trip_id', currentTripId);
         if (!error) {
             setPaymentMethods(prev => prev.filter(p => p !== name));
         }
     };
 
     const renamePaymentMethod = async (oldName: string, newName: string) => {
+        if (!currentTripId) return;
         if (paymentMethods.includes(newName)) return;
 
         // 1. Create new method
-        const { error: createError } = await supabase.from('payment_methods').insert([{ name: newName }]);
+        const { error: createError } = await supabase.from('payment_methods').insert([{ name: newName, trip_id: currentTripId }]);
         if (createError) return;
 
         // 2. Update transactions
-        await supabase.from('transactions').update({ payment_method: newName }).eq('payment_method', oldName);
+        await supabase.from('transactions')
+            .update({ payment_method: newName })
+            .eq('payment_method', oldName)
+            .eq('trip_id', currentTripId);
 
         // 3. Delete old method
-        await supabase.from('payment_methods').delete().eq('name', oldName);
+        await supabase.from('payment_methods').delete().eq('name', oldName).eq('trip_id', currentTripId);
 
         // Update local state
         setPaymentMethods(prev => prev.map(p => p === oldName ? newName : p));
