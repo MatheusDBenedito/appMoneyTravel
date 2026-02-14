@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
 import ConfirmModal from './ConfirmModal';
-import { Trash2, Plus, CreditCard } from 'lucide-react';
+import { Trash2, Plus, CreditCard, Pencil, Check, X } from 'lucide-react';
 
 export default function PaymentMethodManager() {
-    const { paymentMethods, addPaymentMethod, removePaymentMethod } = useExpenses();
+    const { paymentMethods, addPaymentMethod, removePaymentMethod, renamePaymentMethod } = useExpenses();
     const { showToast } = useToast();
 
     const [newMethod, setNewMethod] = useState('');
+    const [editingMethod, setEditingMethod] = useState<string | null>(null);
+    const [editName, setEditName] = useState('');
     const [deleteMethodName, setDeleteMethodName] = useState<string | null>(null);
 
     const handleAdd = async (e: React.FormEvent) => {
@@ -18,6 +20,20 @@ export default function PaymentMethodManager() {
         await addPaymentMethod(newMethod.trim());
         setNewMethod('');
         showToast('Forma de Pagamento adicionada com sucesso!', 'success');
+    };
+
+    const startEditing = (currentName: string) => {
+        setEditingMethod(currentName);
+        setEditName(currentName);
+    };
+
+    const saveEdit = async (oldName: string) => {
+        if (editName.trim() && editName.trim() !== oldName) {
+            await renamePaymentMethod(oldName, editName.trim());
+            showToast('Forma de Pagamento renomeada com sucesso!', 'success');
+        }
+        setEditingMethod(null);
+        setEditName('');
     };
 
     const handleDelete = async () => {
@@ -40,18 +56,52 @@ export default function PaymentMethodManager() {
                 {paymentMethods.length === 0 && (
                     <p className="text-gray-400 text-center italic py-4">Nenhuma forma de pagamento cadastrada.</p>
                 )}
-                {paymentMethods.map(method => (
-                    <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="font-bold text-gray-800">{method}</span>
-                        <button
-                            onClick={() => setDeleteMethodName(method)}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Remover Forma de Pagamento"
-                        >
-                            <Trash2 size={20} />
-                        </button>
-                    </div>
-                ))}
+                {paymentMethods.map(method => {
+                    const isEditing = editingMethod === method;
+
+                    return (
+                        <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            {isEditing ? (
+                                <div className="flex items-center gap-2 flex-1 mr-2">
+                                    <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                        className="w-full px-2 py-1 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        autoFocus
+                                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(method)}
+                                    />
+                                    <button onClick={() => saveEdit(method)} className="text-green-600 hover:bg-green-50 p-1 rounded">
+                                        <Check size={18} />
+                                    </button>
+                                    <button onClick={() => setEditingMethod(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-gray-800">{method}</span>
+                                    <button
+                                        onClick={() => startEditing(method)}
+                                        className="text-gray-300 hover:text-purple-600 transition-colors"
+                                    >
+                                        <Pencil size={14} />
+                                    </button>
+                                </div>
+                            )}
+
+                            {!isEditing && (
+                                <button
+                                    onClick={() => setDeleteMethodName(method)}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Remover Forma de Pagamento"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Add Form */}

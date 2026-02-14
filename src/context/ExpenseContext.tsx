@@ -24,6 +24,7 @@ interface ExpenseContextType {
     getWalletBalance: (walletId: WalletType) => number;
     addPaymentMethod: (name: string) => Promise<void>;
     removePaymentMethod: (name: string) => Promise<void>;
+    renamePaymentMethod: (oldName: string, newName: string) => Promise<void>;
 }
 
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
@@ -172,6 +173,24 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         if (!error) {
             setPaymentMethods(prev => prev.filter(p => p !== name));
         }
+    };
+
+    const renamePaymentMethod = async (oldName: string, newName: string) => {
+        if (paymentMethods.includes(newName)) return;
+
+        // 1. Create new method
+        const { error: createError } = await supabase.from('payment_methods').insert([{ name: newName }]);
+        if (createError) return;
+
+        // 2. Update transactions
+        await supabase.from('transactions').update({ payment_method: newName }).eq('payment_method', oldName);
+
+        // 3. Delete old method
+        await supabase.from('payment_methods').delete().eq('name', oldName);
+
+        // Update local state
+        setPaymentMethods(prev => prev.map(p => p === oldName ? newName : p));
+        setTransactions(prev => prev.map(t => t.paymentMethod === oldName ? { ...t, paymentMethod: newName } : t));
     };
 
     const addTransaction = async (data: Omit<Transaction, 'id'>) => {
@@ -325,7 +344,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             getWalletBalance,
             paymentMethods,
             addPaymentMethod,
-            removePaymentMethod
+            removePaymentMethod,
+            renamePaymentMethod
         }}>
             {children}
         </ExpenseContext.Provider>
