@@ -13,6 +13,8 @@ interface ExpenseContextType {
     updateTransaction: (transaction: Transaction) => Promise<void>;
     removeTransaction: (id: string) => Promise<void>;
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
+    updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
+    removeExchange: (id: string) => Promise<void>;
     addWallet: (name: string) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
     addCategory: (name: string) => Promise<void>;
@@ -242,6 +244,31 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
+    const updateExchange = async (exchange: ExchangeTransaction) => {
+        const dbExchange = {
+            origin_currency: exchange.originCurrency,
+            origin_amount: exchange.originAmount,
+            target_amount: exchange.targetAmount,
+            rate: exchange.rate,
+            target_wallet: exchange.targetWallet,
+            date: exchange.date,
+            location: exchange.location
+        };
+
+        const { error } = await supabase.from('exchanges').update(dbExchange).eq('id', exchange.id);
+
+        if (!error) {
+            setExchanges(prev => prev.map(e => e.id === exchange.id ? exchange : e));
+        }
+    };
+
+    const removeExchange = async (id: string) => {
+        const { error } = await supabase.from('exchanges').delete().eq('id', id);
+        if (!error) {
+            setExchanges(prev => prev.filter(e => e.id !== id));
+        }
+    };
+
     // ... (updateBudget, getWalletBalance remain same - skipped in replacement block for brevity/focus, handled by surrounding context if I replace correctly. Better to replace whole function blocks if I can, or targeted.)
     // Wait, I am replacing a huge chunk. Let me be careful about `updateBudget` and `getWalletBalance`. 
     // They are in the `TargetContent` range if I am not careful.
@@ -333,6 +360,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             updateTransaction,
             removeTransaction,
             addExchange,
+            updateExchange,
+            removeExchange,
             addWallet,
             removeWallet,
             addCategory,
