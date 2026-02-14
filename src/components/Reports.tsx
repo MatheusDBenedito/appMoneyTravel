@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { PieChart, TrendingUp, DollarSign, Users, Filter } from 'lucide-react';
 import { clsx } from 'clsx';
