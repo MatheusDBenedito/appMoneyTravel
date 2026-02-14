@@ -35,6 +35,8 @@ interface ExpenseContextType {
     removePaymentMethod: (name: string) => Promise<void>;
     renamePaymentMethod: (oldName: string, newName: string) => Promise<void>;
     createTrip: (name: string) => Promise<string | null>;
+    updateTrip: (id: string, name: string) => Promise<{ error: any }>;
+    deleteTrip: (id: string) => Promise<{ error: any }>;
     switchTrip: (tripId: string) => void;
 }
 
@@ -156,6 +158,26 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         setTrips(prev => [data, ...prev]);
         // showToast('Viagem criada com sucesso!', 'success');
         return data.id;
+    };
+
+    const updateTrip = async (id: string, name: string) => {
+        const { error } = await supabase.from('trips').update({ name }).eq('id', id);
+        if (!error) {
+            setTrips(prev => prev.map(t => t.id === id ? { ...t, name } : t));
+        }
+        return { error };
+    };
+
+    const deleteTrip = async (id: string) => {
+        const { error } = await supabase.from('trips').delete().eq('id', id);
+        if (!error) {
+            setTrips(prev => prev.filter(t => t.id !== id));
+            if (currentTripId === id) {
+                setCurrentTripId(null);
+                // Optionally switch to another trip or clear state
+            }
+        }
+        return { error };
     };
 
     const switchTrip = (tripId: string) => {
@@ -523,6 +545,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             currentTripId,
             isLoading,
             createTrip,
+            updateTrip,
+            deleteTrip,
             switchTrip,
             wallets,
             transactions,

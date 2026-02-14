@@ -9,6 +9,7 @@ import ExchangeForm from './components/ExchangeForm';
 import PeopleManager from './components/PeopleManager';
 import CategoryManager from './components/CategoryManager';
 import PaymentMethodManager from './components/PaymentMethodManager';
+import TripManager from './components/TripManager';
 import WalletCard from './components/WalletCard';
 import Reports from './components/Reports';
 import { ToastProvider } from './context/ToastContext';
@@ -149,6 +150,7 @@ function App() {
                 </div>
                 <div className="space-y-6">
                   <CategoryManager />
+                  <TripManager />
                 </div>
               </section>
             )}
