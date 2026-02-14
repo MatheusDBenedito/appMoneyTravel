@@ -36,8 +36,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
         }
     }, [category, autoSharedCategories]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = () => {
+
         if (!amount || !description) return;
 
         addTransaction({
@@ -78,7 +78,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-5">
 
                     {/* Amount Input */}
                     <div>
@@ -184,14 +184,15 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose }) =>
                     </div>
 
                     <button
-                        type="submit"
+                        type="button"
+                        onClick={handleSubmit}
                         className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 active:scale-95 transition-transform flex items-center justify-center gap-2"
                     >
                         <Check size={20} />
                         Save Transaction
                     </button>
 
-                </form>
+                </div>
             </div>
         </div>
     );
