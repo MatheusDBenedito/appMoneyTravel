@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
+import { useToast } from '../context/ToastContext';
 import { ArrowDown, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { WalletType } from '../types';
 
 export default function ExchangeForm() {
     const { addExchange, wallets } = useExpenses();
+    const { showToast } = useToast();
+
     const [originAmount, setOriginAmount] = useState('');
     const [targetAmount, setTargetAmount] = useState('');
     const [originCurrency] = useState('BRL');
@@ -15,22 +18,27 @@ export default function ExchangeForm() {
         ? (parseFloat(originAmount) / parseFloat(targetAmount)).toFixed(2)
         : '---';
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!originAmount || !targetAmount) return;
 
-        addExchange({
-            originAmount: parseFloat(originAmount),
-            targetAmount: parseFloat(targetAmount),
-            originCurrency,
-            targetWallet,
-            rate: parseFloat(rate),
-            date: new Date(),
-        });
+        try {
+            await addExchange({
+                originAmount: parseFloat(originAmount),
+                targetAmount: parseFloat(targetAmount),
+                originCurrency,
+                targetWallet,
+                rate: parseFloat(rate),
+                date: new Date(),
+            });
 
-        setOriginAmount('');
-        setTargetAmount('');
-        alert('Câmbio registrado com sucesso!');
+            setOriginAmount('');
+            setTargetAmount('');
+            showToast('Câmbio registrado com sucesso!', 'success');
+        } catch (error) {
+            console.error(error);
+            showToast('Erro ao registrar câmbio.', 'error');
+        }
     };
 
     return (

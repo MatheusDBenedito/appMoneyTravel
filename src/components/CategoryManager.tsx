@@ -1,14 +1,20 @@
 
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
+import { useToast } from '../context/ToastContext';
+import ConfirmModal from './ConfirmModal';
 import { Trash2, Plus, Tag, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
-
 
 export default function CategoryManager() {
     const { categories, autoSharedCategories, addCategory, removeCategory, renameCategory, toggleAutoShare } = useExpenses();
+    const { showToast } = useToast();
+
     const [newCategory, setNewCategory] = useState('');
     const [editingCategory, setEditingCategory] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
+
+    // Delete Modal State
+    const [deleteCategoryName, setDeleteCategoryName] = useState<string | null>(null);
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,6 +22,7 @@ export default function CategoryManager() {
 
         addCategory(newCategory.trim());
         setNewCategory('');
+        showToast('Categoria adicionada com sucesso!', 'success');
     };
 
     const startEditing = (currentName: string) => {
@@ -26,9 +33,18 @@ export default function CategoryManager() {
     const saveEdit = (oldName: string) => {
         if (editName.trim() && editName.trim() !== oldName) {
             renameCategory(oldName, editName.trim());
+            showToast('Categoria renomeada com sucesso!', 'success');
         }
         setEditingCategory(null);
         setEditName('');
+    };
+
+    const handleDelete = () => {
+        if (deleteCategoryName) {
+            removeCategory(deleteCategoryName);
+            showToast('Categoria removida com sucesso.', 'success');
+            setDeleteCategoryName(null);
+        }
     };
 
     return (
@@ -55,6 +71,7 @@ export default function CategoryManager() {
                                         onChange={(e) => setEditName(e.target.value)}
                                         className="w-full px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         autoFocus
+                                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(category)}
                                     />
                                     <button onClick={() => saveEdit(category)} className="text-green-600 hover:bg-green-50 p-1 rounded">
                                         <Check size={18} />
@@ -95,11 +112,7 @@ export default function CategoryManager() {
 
                             {!isEditing && (
                                 <button
-                                    onClick={() => {
-                                        if (confirm(`Remover categoria "${category}" ? `)) {
-                                            removeCategory(category);
-                                        }
-                                    }}
+                                    onClick={() => setDeleteCategoryName(category)}
                                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Remover Categoria"
                                 >
@@ -131,6 +144,17 @@ export default function CategoryManager() {
                     </button>
                 </div>
             </form>
+
+            {/* Confirm Category Delete */}
+            <ConfirmModal
+                isOpen={!!deleteCategoryName}
+                onClose={() => setDeleteCategoryName(null)}
+                onConfirm={handleDelete}
+                title="Remover Categoria"
+                message={`Tem certeza que deseja remover a categoria "${deleteCategoryName}"?`}
+                confirmText="Remover"
+                isDestructive
+            />
         </div>
     );
 }
