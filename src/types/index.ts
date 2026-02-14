@@ -28,6 +28,7 @@ export interface Transaction {
     payer: WalletType;
     isShared: boolean;
     paymentMethod?: string; // e.g., 'Credit', 'Debit', 'Cash', 'Pix'
+    tax?: number;
     trip_id?: string;
 }
 

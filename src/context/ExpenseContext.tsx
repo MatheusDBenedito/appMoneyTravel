@@ -109,7 +109,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                     const mappedTransactions = transactionsData.map((t: any) => ({
                         ...t,
                         isShared: t.is_shared,
-                        paymentMethod: t.payment_method
+                        paymentMethod: t.payment_method,
+                        tax: t.tax
                     }));
                     setTransactions(mappedTransactions);
                 }
@@ -393,6 +394,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
                 payer: transaction.payer,
                 is_shared: transaction.isShared,
                 payment_method: transaction.paymentMethod,
+                tax: transaction.tax ?? 0,
                 trip_id: currentTripId
             };
 
@@ -529,7 +531,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             category: transaction.category,
             payer: transaction.payer,
             is_shared: transaction.isShared,
-            payment_method: transaction.paymentMethod
+            payment_method: transaction.paymentMethod,
+            tax: transaction.tax ?? 0
         };
 
         const { error } = await supabase.from('transactions').update(dbTransaction).eq('id', transaction.id);

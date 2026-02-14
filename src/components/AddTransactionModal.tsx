@@ -16,6 +16,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
     const { showToast } = useToast();
 
     const [amount, setAmount] = useState('');
+    const [tax, setTax] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState<Category>('General');
     const [payer, setPayer] = useState<WalletType>(wallets[0]?.id || '');
@@ -32,6 +33,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
     useEffect(() => {
         if (initialData) {
             setAmount(initialData.amount.toString());
+            setTax(initialData.tax ? initialData.tax.toString() : '');
             setDescription(initialData.description);
             setCategory(initialData.category);
             setPayer(initialData.payer);
@@ -64,6 +66,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
         try {
             const transactionData = {
                 amount: parseFloat(amount),
+                tax: tax ? parseFloat(tax) : 0,
                 description,
                 category,
                 payer,
@@ -120,7 +123,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
     return (
         <>
             <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300">
+                <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300 max-h-[90vh] overflow-y-auto">
 
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-800">
@@ -133,23 +136,40 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ onClose, init
 
                     <div className="space-y-5">
 
-                        {/* Amount Input */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-1">Valor</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    inputMode="decimal"
-                                    value={amount}
-                                    onKeyDown={handleAmountKeyDown}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="0,00"
-                                    autoFocus={!initialData} // Only autofocus on new
-                                    required
-                                />
+                        {/* Amount and Tax */}
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Valor</label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        inputMode="decimal"
+                                        value={amount}
+                                        onKeyDown={handleAmountKeyDown}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                        className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="0,00"
+                                        autoFocus={!initialData} // Only autofocus on new
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="w-1/3">
+                                <label className="block text-sm font-medium text-gray-500 mb-1">Taxa</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        inputMode="decimal"
+                                        value={tax}
+                                        onChange={(e) => setTax(e.target.value)}
+                                        className="w-full pl-6 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="0"
+                                    />
+                                </div>
                             </div>
                         </div>
 
