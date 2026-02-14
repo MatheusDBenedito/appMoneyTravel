@@ -59,15 +59,40 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                             </div>
                             <div>
                                 <p className="font-medium text-gray-800">{t.description}</p>
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                                     <span>{new Date(t.date).toLocaleDateString()}</span>
-                                    <span>•</span>
-                                    <span className={clsx(
-                                        "px-1.5 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide",
-                                        t.isShared ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"
-                                    )}>
-                                        {t.isShared ? "Compartilhado" : wallet?.name || "Pessoal"}
-                                    </span>
+
+                                    {/* Avatars Section */}
+                                    <div className="flex -space-x-2 ml-1">
+                                        {t.isShared ? (
+                                            wallets.map(w => (
+                                                <div
+                                                    key={w.id}
+                                                    className="w-5 h-5 rounded-full border border-white bg-gray-100 flex items-center justify-center overflow-hidden"
+                                                    title={w.name}
+                                                >
+                                                    {w.avatar_url ? (
+                                                        <img src={w.avatar_url} alt={w.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-[8px] font-bold text-gray-500">{w.name.charAt(0)}</span>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            wallet && (
+                                                <div
+                                                    className="w-5 h-5 rounded-full border border-white bg-gray-100 flex items-center justify-center overflow-hidden"
+                                                    title={wallet.name}
+                                                >
+                                                    {wallet.avatar_url ? (
+                                                        <img src={wallet.avatar_url} alt={wallet.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-[8px] font-bold text-gray-500">{wallet.name.charAt(0)}</span>
+                                                    )}
+                                                </div>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
