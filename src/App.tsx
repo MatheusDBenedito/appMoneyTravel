@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useExpenses } from './context/ExpenseContext';
-import { Plus, Settings, Home, DollarSign, Menu } from 'lucide-react';
+import { Plus, Settings, Home, DollarSign } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 // Components
 import TransactionList from './components/TransactionList';

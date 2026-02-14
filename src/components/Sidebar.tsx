@@ -1,6 +1,7 @@
 
-import React from 'react';
-import { Home, DollarSign, Settings, LogOut, Wallet } from 'lucide-react';
+
+import { Home, DollarSign, Settings, Wallet } from 'lucide-react';
+
 
 interface SidebarProps {
     activeTab: 'dashboard' | 'exchange' | 'settings' | 'history';
@@ -29,7 +30,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
 
             <nav className="flex-1 p-4 space-y-2">
                 {menuItems.map((item) => {
-                    const isActive = activeTab === item.id || (item.id === 'dashboard' && activeTab === 'history'); // Highlight dashboard for history too? Or separate history tab?
+
                     // Since history is a sub-view of dashboard in mobile, let's treat it distinct here if we want a sidebar item for it, 
                     // OR keep it consistent with mobile logic.
                     // Let's stick to the props passed: activeTab.
@@ -39,8 +40,8 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
-                                    ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
+                                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                 }`}
                         >
                             <item.icon size={20} />
