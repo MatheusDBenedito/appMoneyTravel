@@ -1,6 +1,8 @@
 
 import { useExpenses } from '../context/ExpenseContext'; // Import context
 import { Home, DollarSign, Settings, Wallet, PieChart, Map } from 'lucide-react';
+import { useState } from 'react';
+import CreateTripModal from './CreateTripModal';
 
 
 interface SidebarProps {
@@ -10,16 +12,16 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
-    const { trips, currentTripId, switchTrip, createTrip } = useExpenses(); // Get trip data
+    const { trips, currentTripId, switchTrip } = useExpenses(); // Get trip data
+    const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
 
     const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const val = e.target.value;
         if (val === 'new_trip') {
-            const name = window.prompt("Nome da nova viagem:");
-            if (name) {
-                const id = await createTrip(name);
-                if (id) switchTrip(id);
-            }
+            setIsCreateTripModalOpen(true);
+            // Reset selection to current trip (deferred to render or handled by controlled component)
+            // But since it's controlled by currentTripId, it will snap back unless we change it.
+            // We just open the modal.
         } else {
             switchTrip(val);
         }
@@ -94,6 +96,9 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
                     <span>v1.0.0</span>
                 </div>
             </div>
+            {isCreateTripModalOpen && (
+                <CreateTripModal onClose={() => setIsCreateTripModalOpen(false)} />
+            )}
         </aside>
     );
 }
