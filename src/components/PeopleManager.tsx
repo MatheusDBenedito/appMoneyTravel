@@ -11,7 +11,6 @@ export default function PeopleManager() {
     const [errorId, setErrorId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
-    const [editName, setEditName] = useState('');
     const [file, setFile] = useState<File | null>(null); // For new wallet
     const [includedInDivision, setIncludedInDivision] = useState(true); // New state
     const [uploadingId, setUploadingId] = useState<string | null>(null); // For existing wallet
@@ -147,9 +146,6 @@ export default function PeopleManager() {
                                             <span className="font-bold text-gray-800">{wallet.name}</span>
                                             <button
                                                 onClick={() => startEditing(wallet.id, wallet.name)}
-                                                className="text-gray-300 hover:text-purple-600 transition-colors"
-                                            >
-                                                <Pencil size={14} />
                                                 className="text-gray-300 hover:text-purple-600 transition-colors"
                                             >
                                                 <Pencil size={14} />
