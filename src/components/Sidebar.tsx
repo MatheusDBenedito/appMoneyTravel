@@ -1,6 +1,6 @@
 import { useExpenses } from '../context/ExpenseContext';
 // import { useToast } from '../hooks/useToast';
-import { Home, DollarSign, Settings, Wallet, PieChart, Map, ArrowRightLeft } from 'lucide-react';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
 
@@ -9,10 +9,10 @@ interface SidebarProps {
     activeTab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports';
     setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports') => void;
     className?: string;
-    onOpenReturn: () => void;
+
 }
 
-export default function Sidebar({ activeTab, setActiveTab, className = '', onOpenReturn }: SidebarProps) {
+export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
     const { trips, currentTripId, switchTrip } = useExpenses(); // Get trip data
     const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
 
@@ -41,7 +41,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '', onOpe
     return (
         <aside className={`bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 ${className}`}>
             <div className="p-6 border-b border-gray-100 space-y-4">
-                <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
                     <span className="bg-blue-600 text-white p-1 rounded-lg">
                         <Map size={20} />
                     </span>
@@ -84,13 +84,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '', onOpe
                     </button>
                 ))}
 
-                <button
-                    onClick={onOpenReturn}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-green-600 hover:bg-green-50 hover:text-green-700 font-medium mt-4 border border-green-100"
-                >
-                    <ArrowRightLeft size={20} />
-                    <span>Devolução</span>
-                </button>
+
             </nav>
 
             <div className="p-4 border-t border-gray-100">

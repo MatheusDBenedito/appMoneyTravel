@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ExpenseProvider, useExpenses } from './context/ExpenseContext';
 import { Plus, ArrowRightLeft, Settings, PieChart, Wallet, Home, DollarSign } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import CreateTripModal from './components/CreateTripModal';
 // Components
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
@@ -17,11 +18,27 @@ import { ToastProvider } from './context/ToastContext';
 import type { Transaction } from './types'; // Import Transaction type
 
 function AppContent() {
-  const { wallets, getWalletBalance } = useExpenses();
+  const { wallets, getWalletBalance, trips, currentTripId, switchTrip } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
+
+  const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === 'new_trip') {
+      setIsCreateTripModalOpen(true);
+    } else {
+      switchTrip(val);
+    }
+  };
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports'>(() => {
+    return (localStorage.getItem('moneytravel_active_tab') as any) || 'dashboard';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('moneytravel_active_tab', activeTab);
+  }, [activeTab]);
 
   const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
 
@@ -55,7 +72,6 @@ function AppContent() {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           className="hidden md:flex w-64 flex-shrink-0 z-50 shadow-sm"
-          onOpenReturn={() => setIsReturnModalOpen(true)}
         />
 
         {/* Main Content Wrapper */}
@@ -64,10 +80,30 @@ function AppContent() {
           {/* Mobile Header (Blue) */}
           <header className="md:hidden bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg flex-shrink-0">
             <div className="flex justify-between items-center mb-4">
-              <h1 className="text-xl font-bold">MoneyTravel</h1>
+              <div className="relative max-w-[70%]">
+                <select
+                  value={currentTripId || ''}
+                  onChange={handleTripChange}
+                  className="appearance-none bg-blue-800/50 text-white border border-blue-500/30 py-2 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 font-bold text-lg truncate w-full"
+                  style={{ backgroundImage: 'none' }}
+                >
+                  {trips.map(trip => (
+                    <option key={trip.id} value={trip.id} className="text-gray-900">
+                      {trip.name}
+                    </option>
+                  ))}
+                  <option disabled className="text-gray-900">──────────</option>
+                  <option value="new_trip" className="text-gray-900">➕ Nova Viagem...</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-blue-200">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                </div>
+              </div>
+
               <button
                 onClick={() => setActiveTab('settings')}
                 className="p-2 hover:bg-blue-700 rounded-full transition-colors"
+                title="Configurações"
               >
                 <Settings size={20} />
               </button>
@@ -263,6 +299,10 @@ function AppContent() {
           </button>
         </nav>
 
+        {/* Trip Modal */}
+        {isCreateTripModalOpen && (
+          <CreateTripModal onClose={() => setIsCreateTripModalOpen(false)} />
+        )}
       </div>
     </ToastProvider>
   );
