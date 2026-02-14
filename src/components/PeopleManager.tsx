@@ -156,7 +156,7 @@ export default function PeopleManager() {
                                                     step="0.01"
                                                     value={editBudget}
                                                     onChange={(e) => setEditBudget(e.target.value)}
-                                                    className="w-full text-xs p-1 border border-transparent hover:border-gray-200 rounded focus:outline-none focus:border-purple-300"
+                                                    className="flex-1 min-w-0 text-xs p-1 bg-gray-50 border border-transparent hover:border-gray-200 rounded focus:outline-none focus:border-purple-300 focus:bg-white transition-colors"
                                                     placeholder="Definir Saldo Atual"
                                                     title="Ao alterar este valor, o Saldo Inicial será reajustado automaticamente para atingir o valor desejado."
                                                 />
