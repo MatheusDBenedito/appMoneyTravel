@@ -65,11 +65,14 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                                     {/* Avatars Section */}
                                     <div className="flex -space-x-2 ml-1">
                                         {t.isShared ? (
-                                            wallets.map(w => (
+                                            [...wallets].sort((a, b) => a.id === t.payer ? -1 : b.id === t.payer ? 1 : 0).map(w => (
                                                 <div
                                                     key={w.id}
-                                                    className="w-5 h-5 rounded-full border border-white bg-gray-100 flex items-center justify-center overflow-hidden"
-                                                    title={w.name}
+                                                    className={clsx(
+                                                        "w-5 h-5 rounded-full border border-white flex items-center justify-center overflow-hidden",
+                                                        w.id === t.payer ? "z-10 ring-1 ring-offset-1 ring-blue-500" : "bg-gray-100"
+                                                    )}
+                                                    title={w.id === t.payer ? `${w.name} (Pagou)` : w.name}
                                                 >
                                                     {w.avatar_url ? (
                                                         <img src={w.avatar_url} alt={w.name} className="w-full h-full object-cover" />
