@@ -22,10 +22,15 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, balance }) => {
         )}>
             <div className="flex items-center gap-2 mb-2">
                 <div className={clsx(
-                    "p-2 rounded-full",
-                    isMe ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"
+                    "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border",
+                    isMe ? "bg-blue-100 text-blue-600 border-blue-200" : "bg-pink-100 text-pink-600 border-pink-200",
+                    wallet.avatar_url && "p-0 bg-transparent border-gray-200"
                 )}>
-                    {isMe ? <User size={18} /> : <Heart size={18} />}
+                    {wallet.avatar_url ? (
+                        <img src={wallet.avatar_url} alt={wallet.name} className="w-full h-full object-cover" />
+                    ) : (
+                        isMe ? <User size={20} /> : <Heart size={20} />
+                    )}
                 </div>
                 <h3 className="font-semibold text-gray-700">{wallet.name}</h3>
             </div>

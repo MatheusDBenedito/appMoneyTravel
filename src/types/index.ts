@@ -4,6 +4,7 @@ export interface Wallet {
     id: WalletType;
     name: string;
     budget: number;
+    avatar_url?: string;
 }
 
 export type Category = string;

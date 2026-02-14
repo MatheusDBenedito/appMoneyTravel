@@ -15,8 +15,10 @@ interface ExpenseContextType {
     addExchange: (exchange: Omit<ExchangeTransaction, 'id'>) => Promise<void>;
     updateExchange: (exchange: ExchangeTransaction) => Promise<void>;
     removeExchange: (id: string) => Promise<void>;
-    addWallet: (name: string) => Promise<void>;
+    addWallet: (name: string, avatarUrl?: string) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
+    updateWalletAvatar: (id: string, avatarUrl: string) => Promise<void>;
+    uploadAvatar: (file: File) => Promise<string | null>;
     addCategory: (name: string) => Promise<void>;
     removeCategory: (name: string) => Promise<void>;
     renameCategory: (oldName: string, newName: string) => Promise<void>;
@@ -85,10 +87,38 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
     };
 
-    const addWallet = async (name: string) => {
-        const { data, error } = await supabase.from('wallets').insert([{ name, budget: 0 }]).select().single();
+    const addWallet = async (name: string, avatarUrl?: string) => {
+        const { data, error } = await supabase.from('wallets').insert([{ name, budget: 0, avatar_url: avatarUrl }]).select().single();
         if (data && !error) {
             setWallets(prev => [...prev, data]);
+        }
+    };
+
+    const updateWalletAvatar = async (id: string, avatarUrl: string) => {
+        const { error } = await supabase.from('wallets').update({ avatar_url: avatarUrl }).eq('id', id);
+        if (!error) {
+            setWallets(prev => prev.map(w => w.id === id ? { ...w, avatar_url: avatarUrl } : w));
+        }
+    };
+
+    const uploadAvatar = async (file: File) => {
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+
+            if (uploadError) {
+                console.error('Error uploading avatar:', uploadError);
+                return null;
+            }
+
+            const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+            return data.publicUrl;
+        } catch (error) {
+            console.error('Error in uploadAvatar:', error);
+            return null;
         }
     };
 
@@ -364,6 +394,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             removeExchange,
             addWallet,
             removeWallet,
+            updateWalletAvatar,
+            uploadAvatar,
             addCategory,
             removeCategory,
             renameCategory,

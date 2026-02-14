@@ -1,21 +1,50 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { Trash2, UserPlus, Users, Pencil, Check, X } from 'lucide-react';
+import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function PeopleManager() {
-    const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance } = useExpenses();
+    const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance, uploadAvatar, updateWalletAvatar } = useExpenses();
     const [newName, setNewName] = useState('');
     const [errorId, setErrorId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
+    const [file, setFile] = useState<File | null>(null); // For new wallet
+    const [uploadingId, setUploadingId] = useState<string | null>(null); // For existing wallet
 
-    const handleAdd = (e: React.FormEvent) => {
+    // Helper to trigger hidden file input from the list (edit mode)
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, walletId?: string) => {
+        if (e.target.files && e.target.files[0]) {
+            const selectedFile = e.target.files[0];
+
+            if (walletId) {
+                // Determine if we are updating an existing wallet directly
+                setUploadingId(walletId);
+                const url = await uploadAvatar(selectedFile);
+                if (url) {
+                    await updateWalletAvatar(walletId, url);
+                }
+                setUploadingId(null);
+            } else {
+                // Setting file for new wallet creation
+                setFile(selectedFile);
+            }
+        }
+    };
+
+    const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newName.trim()) return;
 
-        addWallet(newName.trim());
+        let avatarUrl = undefined;
+        if (file) {
+            const url = await uploadAvatar(file);
+            if (url) avatarUrl = url;
+        }
+
+        await addWallet(newName.trim(), avatarUrl);
         setNewName('');
+        setFile(null);
         setErrorId(null);
     };
 
@@ -68,7 +97,33 @@ export default function PeopleManager() {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-3">
+                                            {/* Avatar / Photo */}
+                                            <div className="relative group">
+                                                <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border border-gray-300">
+                                                    {wallet.avatar_url ? (
+                                                        <img src={wallet.avatar_url} alt={wallet.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User className="text-gray-400" size={20} />
+                                                    )}
+                                                </div>
+
+                                                {/* Edit Overlay */}
+                                                <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                                    {uploadingId === wallet.id ? (
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                    ) : (
+                                                        <Camera className="text-white" size={16} />
+                                                    )}
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={(e) => handleFileChange(e, wallet.id)}
+                                                    />
+                                                </label>
+                                            </div>
+
                                             <span className="font-bold text-gray-800">{wallet.name}</span>
                                             <button
                                                 onClick={() => startEditing(wallet.id, wallet.name)}
@@ -114,21 +169,38 @@ export default function PeopleManager() {
             {/* Add Form */}
             <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
                 <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova Pessoa</label>
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500"
-                        placeholder="Nome (ex: Filho)"
-                        required
-                    />
-                    <button
-                        type="submit"
-                        className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all"
-                    >
-                        <UserPlus size={24} />
-                    </button>
+                <div className="flex gap-2 items-center">
+                    {/* New Avatar Input */}
+                    <label className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors relative overflow-hidden border border-gray-300">
+                        {file ? (
+                            <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <Camera className="text-gray-400" size={20} />
+                        )}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e)}
+                        />
+                    </label>
+
+                    <div className="flex-1 flex gap-2">
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500"
+                            placeholder="Nome (ex: Filho)"
+                            required
+                        />
+                        <button
+                            type="submit"
+                            className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all"
+                        >
+                            <UserPlus size={24} />
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

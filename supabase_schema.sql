@@ -4,8 +4,9 @@
 CREATE TABLE wallets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
-    budget NUMERIC DEFAULT 0,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    budget DECIMAL(10,2) DEFAULT 0.00,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    avatar_url TEXT
 );
 
 -- 2. Categories
