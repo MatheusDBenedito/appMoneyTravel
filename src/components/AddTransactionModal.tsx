@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 import ConfirmModal from './ConfirmModal';
 import { X, Check, Trash2 } from 'lucide-react';
 import type { Transaction, WalletType } from '../types';

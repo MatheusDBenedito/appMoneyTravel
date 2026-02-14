@@ -1,17 +1,23 @@
 
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 import ConfirmModal from './ConfirmModal';
-import { Trash2, Plus, Tag, ToggleLeft, ToggleRight, Pencil, Check, X } from 'lucide-react';
+import { Trash2, Plus, Tag, ToggleLeft, ToggleRight, Pencil, Check, X, ChevronDown } from 'lucide-react';
+import { getIcon, availableIcons } from '../utils/iconMap';
 
 export default function CategoryManager() {
     const { categories, autoSharedCategories, addCategory, removeCategory, renameCategory, toggleAutoShare } = useExpenses();
     const { showToast } = useToast();
 
     const [newCategory, setNewCategory] = useState('');
+    const [newCategoryIcon, setNewCategoryIcon] = useState('Wallet');
+    const [showIconPicker, setShowIconPicker] = useState(false);
+
     const [editingCategory, setEditingCategory] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
+    const [editIcon, setEditIcon] = useState('Wallet');
+    const [showEditIconPicker, setShowEditIconPicker] = useState(false);
 
     // Delete Modal State
     const [deleteCategoryName, setDeleteCategoryName] = useState<string | null>(null);
@@ -20,23 +26,32 @@ export default function CategoryManager() {
         e.preventDefault();
         if (!newCategory.trim()) return;
 
-        addCategory(newCategory.trim());
+        addCategory(newCategory.trim(), newCategoryIcon);
         setNewCategory('');
+        setNewCategoryIcon('Wallet');
+        setShowIconPicker(false);
         showToast('Categoria adicionada com sucesso!', 'success');
     };
 
-    const startEditing = (currentName: string) => {
-        setEditingCategory(currentName);
-        setEditName(currentName);
+    const startEditing = (category: { name: string, icon?: string }) => {
+        setEditingCategory(category.name);
+        setEditName(category.name);
+        setEditIcon(category.icon || 'Wallet');
+        setShowEditIconPicker(false);
     };
 
     const saveEdit = (oldName: string) => {
-        if (editName.trim() && editName.trim() !== oldName) {
-            renameCategory(oldName, editName.trim());
-            showToast('Categoria renomeada com sucesso!', 'success');
+        if (editName.trim() && editingCategory) {
+            const currentCat = categories.find(c => c.name === editingCategory);
+            if (editName.trim() !== oldName || (currentCat && editIcon !== currentCat.icon)) {
+                // Pass new icon as well
+                renameCategory(oldName, editName.trim(), editIcon);
+                showToast('Categoria atualizada com sucesso!', 'success');
+            }
         }
         setEditingCategory(null);
         setEditName('');
+        setEditIcon('Wallet');
     };
 
     const handleDelete = () => {
@@ -59,33 +74,71 @@ export default function CategoryManager() {
                 {categories.map(category => {
                     const isAutoShared = autoSharedCategories.includes(category.name);
                     const isEditing = editingCategory === category.name;
+                    const Icon = getIcon(category.icon);
 
                     return (
                         <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
 
                             {isEditing ? (
-                                <div className="flex items-center gap-2 flex-1 mr-2">
-                                    <input
-                                        type="text"
-                                        value={editName}
-                                        onChange={(e) => setEditName(e.target.value)}
-                                        className="w-full px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        autoFocus
-                                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(category.name)}
-                                    />
-                                    <button onClick={() => saveEdit(category.name)} className="text-green-600 hover:bg-green-50 p-1 rounded">
-                                        <Check size={18} />
-                                    </button>
-                                    <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
-                                        <X size={18} />
-                                    </button>
+                                <div className="flex flex-col gap-2 flex-1 mr-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowEditIconPicker(!showEditIconPicker)}
+                                                className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                                            >
+                                                {React.createElement(getIcon(editIcon), { size: 18, className: "text-blue-600" })}
+                                                <ChevronDown size={14} className="text-gray-400" />
+                                            </button>
+
+                                            {showEditIconPicker && (
+                                                <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-10 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
+                                                    {availableIcons.map(iconName => (
+                                                        <button
+                                                            key={iconName}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setEditIcon(iconName);
+                                                                setShowEditIconPicker(false);
+                                                            }}
+                                                            className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center ${editIcon === iconName ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
+                                                            title={iconName}
+                                                        >
+                                                            {React.createElement(getIcon(iconName), { size: 18 })}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <input
+                                            type="text"
+                                            value={editName}
+                                            onChange={(e) => setEditName(e.target.value)}
+                                            className="flex-1 px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            autoFocus
+                                            onKeyDown={(e) => e.key === 'Enter' && saveEdit(category.name)}
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-1">
+                                        <button onClick={() => saveEdit(category.name)} className="text-green-600 hover:bg-green-50 p-1 rounded">
+                                            <Check size={18} />
+                                        </button>
+                                        <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
+                                            <X size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-2">
+                                        <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
+                                            <Icon size={16} />
+                                        </div>
                                         <span className="font-bold text-gray-800">{category.name}</span>
                                         <button
-                                            onClick={() => startEditing(category.name)}
+                                            onClick={() => startEditing(category)}
                                             className="text-gray-300 hover:text-blue-600 transition-colors"
                                         >
                                             <Pencil size={14} />
@@ -128,6 +181,36 @@ export default function CategoryManager() {
             <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
                 <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova Categoria</label>
                 <div className="flex gap-2">
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setShowIconPicker(!showIconPicker)}
+                            className="px-3 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center gap-2"
+                        >
+                            {React.createElement(getIcon(newCategoryIcon), { size: 20, className: "text-blue-600" })}
+                            <ChevronDown size={14} className="text-gray-400" />
+                        </button>
+
+                        {showIconPicker && (
+                            <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-10 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
+                                {availableIcons.map(iconName => (
+                                    <button
+                                        key={iconName}
+                                        type="button"
+                                        onClick={() => {
+                                            setNewCategoryIcon(iconName);
+                                            setShowIconPicker(false);
+                                        }}
+                                        className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center ${newCategoryIcon === iconName ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
+                                        title={iconName}
+                                    >
+                                        {React.createElement(getIcon(iconName), { size: 18 })}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     <input
                         type="text"
                         value={newCategory}

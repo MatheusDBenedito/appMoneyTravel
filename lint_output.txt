@@ -1,0 +1,16 @@
+﻿
+> app-money-travel@0.0.0 lint
+> eslint .
+
+
+C:\Projetos\appMoneyTravel\src\components\Sidebar.tsx
+  1:10  error  'useToast' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Projetos\appMoneyTravel\src\context\ExpenseContext.tsx
+  677:0  error  Parsing error: '}' expected
+
+C:\Projetos\appMoneyTravel\src\context\ToastContext.tsx
+  1:32  error  'useContext' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 3 problems (3 errors, 0 warnings)
+

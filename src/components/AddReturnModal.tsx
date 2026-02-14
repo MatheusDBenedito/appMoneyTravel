@@ -4,7 +4,7 @@ import { X, Check, Trash2, ArrowRightLeft } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { WalletType, Transaction } from '../types';
 import ConfirmModal from './ConfirmModal';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 
 interface AddReturnModalProps {
     isOpen: boolean;

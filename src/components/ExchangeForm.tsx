@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 import { ArrowDown, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { WalletType } from '../types';

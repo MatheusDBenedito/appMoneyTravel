@@ -1,4 +1,5 @@
-import { useExpenses } from '../context/ExpenseContext'; // Import context
+import { useExpenses } from '../context/ExpenseContext';
+// import { useToast } from '../hooks/useToast';
 import { Home, DollarSign, Settings, Wallet, PieChart, Map, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';

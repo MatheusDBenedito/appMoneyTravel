@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 import type { ExchangeTransaction } from '../types';
 import { Trash2, Pencil, Calendar, MapPin } from 'lucide-react';
 import ConfirmModal from './ConfirmModal';

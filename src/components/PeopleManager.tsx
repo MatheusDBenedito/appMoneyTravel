@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
 import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 
