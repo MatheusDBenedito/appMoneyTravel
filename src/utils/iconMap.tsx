@@ -11,7 +11,7 @@ import {
     Radio, RefreshCw, Save, Scissors, Search, Server,
     Settings, Share, Shield, Slash, Sliders, Speaker,
     Sun, Table, Tag, Target, Terminal, Thermometer,
-    ThumbsUp, ToggleLeft, Tool, Trash, Truck, Tv,
+    ThumbsUp, ToggleLeft, PenTool, Trash, Truck, Tv,
     Twitter, Type, Umbrella, Unlock, Upload, User,
     Users, Video, Voicemail, Volume, Watch, Wind,
     X, ZoomIn
@@ -31,7 +31,7 @@ export const iconMap: Record<string, React.ComponentType<{ size?: number; classN
     Radio, RefreshCw, Save, Scissors, Search, Server,
     Settings, Share, Shield, Slash, Sliders, Speaker,
     Sun, Table, Tag, Target, Terminal, Thermometer,
-    ThumbsUp, ToggleLeft, Tool, Trash, Truck, Tv,
+    ThumbsUp, ToggleLeft, PenTool, Trash, Truck, Tv,
     Twitter, Type, Umbrella, Unlock, Upload, User,
     Users, Video, Voicemail, Volume, Watch, Wind,
     X, ZoomIn

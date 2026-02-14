@@ -57,11 +57,11 @@ export default function CategoryManager() {
             {/* List */}
             <div className="space-y-3 mb-8">
                 {categories.map(category => {
-                    const isAutoShared = autoSharedCategories.includes(category);
-                    const isEditing = editingCategory === category;
+                    const isAutoShared = autoSharedCategories.includes(category.name);
+                    const isEditing = editingCategory === category.name;
 
                     return (
-                        <div key={category} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
 
                             {isEditing ? (
                                 <div className="flex items-center gap-2 flex-1 mr-2">
@@ -71,9 +71,9 @@ export default function CategoryManager() {
                                         onChange={(e) => setEditName(e.target.value)}
                                         className="w-full px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         autoFocus
-                                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(category)}
+                                        onKeyDown={(e) => e.key === 'Enter' && saveEdit(category.name)}
                                     />
-                                    <button onClick={() => saveEdit(category)} className="text-green-600 hover:bg-green-50 p-1 rounded">
+                                    <button onClick={() => saveEdit(category.name)} className="text-green-600 hover:bg-green-50 p-1 rounded">
                                         <Check size={18} />
                                     </button>
                                     <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
@@ -83,16 +83,16 @@ export default function CategoryManager() {
                             ) : (
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-bold text-gray-800">{category}</span>
+                                        <span className="font-bold text-gray-800">{category.name}</span>
                                         <button
-                                            onClick={() => startEditing(category)}
+                                            onClick={() => startEditing(category.name)}
                                             className="text-gray-300 hover:text-blue-600 transition-colors"
                                         >
                                             <Pencil size={14} />
                                         </button>
                                     </div>
                                     <button
-                                        onClick={() => toggleAutoShare(category)}
+                                        onClick={() => toggleAutoShare(category.name)}
                                         className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors mt-1"
                                     >
                                         {isAutoShared ? (
@@ -112,7 +112,7 @@ export default function CategoryManager() {
 
                             {!isEditing && (
                                 <button
-                                    onClick={() => setDeleteCategoryName(category)}
+                                    onClick={() => setDeleteCategoryName(category.name)}
                                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Remover Categoria"
                                 >
