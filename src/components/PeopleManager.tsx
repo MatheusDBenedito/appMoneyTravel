@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { useToast } from '../context/ToastContext';
-import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User } from 'lucide-react';
+import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export default function PeopleManager() {
-    const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance, uploadAvatar, updateWalletAvatar } = useExpenses();
+    const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance, uploadAvatar, updateWalletAvatar, updateWalletDivision, updateBudget } = useExpenses();
     const { showToast } = useToast();
     const [newName, setNewName] = useState('');
     const [errorId, setErrorId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState('');
+    const [editBudget, setEditBudget] = useState(''); // Edit state for budget
+    const [editIncludes, setEditIncludes] = useState(true); // Edit state for checkbox
     const [file, setFile] = useState<File | null>(null); // For new wallet
     const [includedInDivision, setIncludedInDivision] = useState(true); // New state
     const [uploadingId, setUploadingId] = useState<string | null>(null); // For existing wallet
@@ -67,15 +69,29 @@ export default function PeopleManager() {
         setErrorId(null);
     };
 
-    const startEditing = (id: string, currentName: string) => {
+    const startEditing = (id: string, currentName: string, currentIncludes: boolean, currentBudget: number) => {
         setEditingId(id);
         setEditName(currentName);
+        setEditIncludes(currentIncludes);
+        setEditBudget(currentBudget.toString());
     };
 
-    const saveEdit = (id: string) => {
+    const saveEdit = async (id: string) => {
         if (editName.trim()) {
             renameWallet(id, editName.trim());
         }
+        // Save budget
+        const budgetVal = parseFloat(editBudget);
+        if (!isNaN(budgetVal)) {
+            updateBudget(id, budgetVal);
+        }
+
+        // Save division status
+        const { error } = await updateWalletDivision(id, editIncludes);
+        if (error) {
+            showToast('Erro ao atualizar status de divisão.', 'error');
+        }
+
         setEditingId(null);
         setEditName('');
     };
@@ -99,18 +115,44 @@ export default function PeopleManager() {
                             <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
 
                                 {isEditing ? (
-                                    <div className="flex items-center gap-2 flex-1 mr-2">
-                                        <input
-                                            type="text"
-                                            value={editName}
-                                            onChange={(e) => setEditName(e.target.value)}
-                                            className="w-full px-2 py-1 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                            autoFocus
-                                        />
-                                        <button onClick={() => saveEdit(wallet.id)} className="text-green-600 hover:bg-green-50 p-1 rounded">
+                                    <div className="flex items-center gap-2 flex-1 mr-2 bg-white p-2 rounded-lg border border-purple-200">
+                                        <div className="flex-1 flex flex-col gap-1">
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                className="w-full px-2 py-1 border-b border-gray-200 focus:outline-none focus:border-purple-500 text-sm font-bold"
+                                                autoFocus
+                                                placeholder="Nome"
+                                            />
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`edit-division-${wallet.id}`}
+                                                    checked={editIncludes}
+                                                    onChange={(e) => setEditIncludes(e.target.checked)}
+                                                    className="w-3 h-3 text-purple-600 rounded border-gray-300"
+                                                />
+                                                <label htmlFor={`edit-division-${wallet.id}`} className="text-xs text-gray-500 cursor-pointer select-none">
+                                                    Divide Contas
+                                                </label>
+                                            </div>
+                                            <div className="flex items-center gap-1 border-t border-gray-100 pt-1 mt-1">
+                                                <DollarSign size={12} className="text-gray-400" />
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editBudget}
+                                                    onChange={(e) => setEditBudget(e.target.value)}
+                                                    className="w-full text-xs p-1 border border-transparent hover:border-gray-200 rounded focus:outline-none focus:border-purple-300"
+                                                    placeholder="Saldo Inicial"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button onClick={() => saveEdit(wallet.id)} className="text-green-600 hover:bg-green-50 p-2 rounded-full">
                                             <Check size={18} />
                                         </button>
-                                        <button onClick={() => setEditingId(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
+                                        <button onClick={() => setEditingId(null)} className="text-gray-400 hover:bg-gray-50 p-2 rounded-full">
                                             <X size={18} />
                                         </button>
                                     </div>
@@ -145,7 +187,7 @@ export default function PeopleManager() {
 
                                             <span className="font-bold text-gray-800">{wallet.name}</span>
                                             <button
-                                                onClick={() => startEditing(wallet.id, wallet.name)}
+                                                onClick={() => startEditing(wallet.id, wallet.name, wallet.includedInDivision, wallet.budget)}
                                                 className="text-gray-300 hover:text-purple-600 transition-colors"
                                             >
                                                 <Pencil size={14} />

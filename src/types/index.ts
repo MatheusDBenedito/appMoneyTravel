@@ -6,6 +6,7 @@ export interface Wallet {
     budget: number;
     avatar_url?: string;
     includedInDivision: boolean;
+    created_at?: string;
 }
 
 export type Category = string;

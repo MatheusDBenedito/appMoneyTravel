@@ -18,6 +18,7 @@ interface ExpenseContextType {
     addWallet: (name: string, avatarUrl?: string, includedInDivision?: boolean) => Promise<void>;
     removeWallet: (id: string) => Promise<void>;
     updateWalletAvatar: (id: string, avatarUrl: string) => Promise<{ error: any }>;
+    updateWalletDivision: (id: string, includedInDivision: boolean) => Promise<{ error: any }>;
     uploadAvatar: (file: File) => Promise<string | null>;
     addCategory: (name: string) => Promise<void>;
     removeCategory: (name: string) => Promise<void>;
@@ -114,6 +115,16 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             setWallets(prev => prev.map(w => w.id === id ? { ...w, avatar_url: avatarUrl } : w));
         } else {
             console.error('Error updating wallet avatar:', error);
+        }
+        return { error };
+    };
+
+    const updateWalletDivision = async (id: string, includedInDivision: boolean) => {
+        const { error } = await supabase.from('wallets').update({ included_in_division: includedInDivision }).eq('id', id);
+        if (!error) {
+            setWallets(prev => prev.map(w => w.id === id ? { ...w, includedInDivision: includedInDivision } : w));
+        } else {
+            console.error('Error updating wallet division:', error);
         }
         return { error };
     };
@@ -346,16 +357,29 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         const wallet = wallets.find(w => w.id === walletId);
         if (!wallet) return 0;
 
-        // Count how many people are participating in the division
-        const dividingWalletsCount = wallets.filter(w => w.includedInDivision).length;
-        const divider = dividingWalletsCount > 0 ? dividingWalletsCount : 1; // Prevent div by zero
-
         let balance = wallet.budget;
+
+        // Helper to check if a wallet existed at a specific date
+        // If created_at is missing, assume it always existed (legacy compatibility)
+        const walletExistedAt = (w: Wallet, date: string | Date) => {
+            if (!w.created_at) return true;
+            // Compare timestamps. 
+            // We use simple comparison: creation time must be BEFORE or EQUAL to transaction time.
+            // Using a small buffer (e.g. same day) might be tricky, but strict timestamp is safest for "history".
+            return new Date(w.created_at) <= new Date(date);
+        };
 
         // Add Exchanges
         exchanges.forEach(ex => {
             if (ex.targetWallet === 'both') {
-                if (wallet.includedInDivision) {
+                // Calculate divider based on who existed at the time of exchange
+                const participants = wallets.filter(w =>
+                    w.includedInDivision && walletExistedAt(w, ex.date)
+                );
+                const divider = participants.length > 0 ? participants.length : 1;
+
+                // Only receive share if this wallet existed and is included
+                if (wallet.includedInDivision && walletExistedAt(wallet, ex.date)) {
                     balance += (ex.targetAmount / divider);
                 }
             } else if (ex.targetWallet === walletId) {
@@ -366,8 +390,14 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // Subtract Expenses
         transactions.forEach(t => {
             if (t.isShared) {
-                // Only subtract if this wallet is included in division
-                if (wallet.includedInDivision) {
+                // Calculate divider based on who existed at the time of transaction
+                const participants = wallets.filter(w =>
+                    w.includedInDivision && walletExistedAt(w, t.date)
+                );
+                const divider = participants.length > 0 ? participants.length : 1;
+
+                // Only subtract if this wallet is included in division AND existed
+                if (wallet.includedInDivision && walletExistedAt(wallet, t.date)) {
                     balance -= (t.amount / divider);
                 }
             } else {
@@ -425,6 +455,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
             addWallet,
             removeWallet,
             updateWalletAvatar,
+            updateWalletDivision,
             uploadAvatar,
             addCategory,
             removeCategory,
