@@ -1,19 +1,20 @@
 
 
-import { Home, DollarSign, Settings, Wallet } from 'lucide-react';
+import { Home, DollarSign, Settings, Wallet, PieChart } from 'lucide-react';
 
 
 interface SidebarProps {
-    activeTab: 'dashboard' | 'exchange' | 'settings' | 'history';
-    setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history') => void;
+    activeTab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports';
+    setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports') => void;
     className?: string;
 }
 
 export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
     const menuItems = [
         { id: 'dashboard', label: 'Visão Geral', icon: Home },
+        { id: 'reports', label: 'Relatórios', icon: PieChart },
         { id: 'exchange', label: 'Câmbio', icon: DollarSign },
-        { id: 'history', label: 'Histórico', icon: Wallet }, // Using Wallet icon for history as a placeholder or reuse existing icon logic
+        { id: 'history', label: 'Histórico', icon: Wallet },
         { id: 'settings', label: 'Configurações', icon: Settings },
     ] as const;
 

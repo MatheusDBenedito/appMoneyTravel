@@ -10,6 +10,7 @@ import PeopleManager from './components/PeopleManager';
 import CategoryManager from './components/CategoryManager';
 import PaymentMethodManager from './components/PaymentMethodManager';
 import WalletCard from './components/WalletCard';
+import Reports from './components/Reports';
 import { ToastProvider } from './context/ToastContext';
 import type { Transaction } from './types'; // Import Transaction type
 
@@ -17,7 +18,7 @@ function App() {
   const { wallets, getWalletBalance } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports'>('dashboard');
 
   const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
 
@@ -70,8 +71,9 @@ function App() {
             <div>
               <h1 className="text-2xl font-bold text-gray-800 capitalize">
                 {activeTab === 'dashboard' ? 'Visão Geral' :
-                  activeTab === 'exchange' ? 'Câmbio' :
-                    activeTab === 'history' ? 'Histórico' : 'Configurações'}
+                  activeTab === 'reports' ? 'Relatórios' :
+                    activeTab === 'exchange' ? 'Câmbio' :
+                      activeTab === 'history' ? 'Histórico' : 'Configurações'}
               </h1>
               <p className="text-gray-500 text-sm">Gerencie seus gastos de viagem</p>
             </div>
@@ -128,6 +130,8 @@ function App() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'reports' && <Reports />}
 
             {/* Exchange Tab */}
             {activeTab === 'exchange' && (
