@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { Wallet, Transaction, ExchangeTransaction, WalletType, Category, PaymentMethod, Trip } from '../types';
+import type { Wallet, Transaction, ExchangeTransaction, WalletType, Trip } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface ExpenseContextType {

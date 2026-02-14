@@ -1,6 +1,6 @@
 
 import { useExpenses } from '../context/ExpenseContext'; // Import context
-import { Home, DollarSign, Settings, Wallet, PieChart, Map, PlusCircle } from 'lucide-react';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map } from 'lucide-react';
 
 
 interface SidebarProps {
@@ -25,7 +25,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
         }
     };
 
-    const currentTrip = trips.find(t => t.id === currentTripId);
+
 
     const menuItems = [
         { id: 'dashboard', label: 'Visão Geral', icon: Home },
