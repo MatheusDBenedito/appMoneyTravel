@@ -521,6 +521,7 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         <ExpenseContext.Provider value={{
             trips,
             currentTripId,
+            isLoading,
             createTrip,
             switchTrip,
             wallets,
