@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 import type { Wallet, Transaction, ExchangeTransaction, WalletType, Trip, Category } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -44,6 +45,7 @@ interface ExpenseContextType {
 const ExpenseContext = createContext<ExpenseContextType | undefined>(undefined);
 
 export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { user } = useAuth();
     const [wallets, setWallets] = useState<Wallet[]>([]);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [exchanges, setExchanges] = useState<ExchangeTransaction[]>([]);
@@ -152,7 +154,8 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
     // --- Trip Management ---
 
     const createTrip = async (name: string) => {
-        const { data, error } = await supabase.from('trips').insert([{ name }]).select().single();
+        if (!user) return null;
+        const { data, error } = await supabase.from('trips').insert([{ name, user_id: user.id }]).select().single();
         if (error) {
             // showToast('Erro ao criar viagem', 'error');
             console.error('Error creating trip:', error);
