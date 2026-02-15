@@ -77,7 +77,7 @@ export default function CategoryManager() {
                     const Icon = getIcon(category.icon);
 
                     return (
-                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 overflow-x-auto">
 
                             {isEditing ? (
                                 <div className="flex flex-col gap-2 flex-1 mr-2">

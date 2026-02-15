@@ -47,7 +47,7 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-end md:items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-[100] flex items-end md:items-center justify-center p-4">
             <div className="bg-white w-full max-w-lg rounded-3xl p-6 relative animate-in slide-in-from-bottom-10 fade-in duration-200">
 
                 <button

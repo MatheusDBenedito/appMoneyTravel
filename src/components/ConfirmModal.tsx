@@ -25,7 +25,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
                 <div className="flex items-center gap-3 mb-4 text-gray-800">
                     <div className="p-2 bg-orange-100 rounded-full text-orange-600">
@@ -51,8 +51,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                             onClose();
                         }}
                         className={`px-4 py-2 text-white font-bold rounded-lg shadow-md transition-transform active:scale-95 ${isDestructive
-                                ? 'bg-red-500 hover:bg-red-600 shadow-red-200'
-                                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                            ? 'bg-red-500 hover:bg-red-600 shadow-red-200'
+                            : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
                             }`}
                     >
                         {confirmText}

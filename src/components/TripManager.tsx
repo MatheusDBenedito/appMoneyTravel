@@ -38,7 +38,7 @@ export default function TripManager() {
 
             <div className="space-y-3">
                 {trips.map(trip => (
-                    <div key={trip.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div key={trip.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 overflow-x-auto">
                         {editingId === trip.id ? (
                             <div className="flex items-center gap-2 flex-1 mr-2 bg-white p-2 rounded-lg border border-blue-200">
                                 <input

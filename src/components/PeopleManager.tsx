@@ -123,8 +123,8 @@ export default function PeopleManager() {
                     const isEditing = editingId === wallet.id;
 
                     return (
-                        <div key={wallet.id} className="flex flex-col gap-1">
-                            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <div key={wallet.id} className="flex flex-col gap-1 overflow-x-auto">
+                            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 min-w-[300px]">
 
                                 {isEditing ? (
                                     <div className="flex items-center gap-2 flex-1 mr-2 bg-white p-2 rounded-lg border border-purple-200">
