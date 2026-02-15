@@ -11,6 +11,7 @@ export default function UserProfile() {
     const [loading, setLoading] = useState(false);
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -34,6 +35,7 @@ export default function UserProfile() {
             if (data) {
                 setFullName(data.full_name || '');
                 setAvatarUrl(data.avatar_url || '');
+                setImageError(false);
             }
         } catch (error: any) {
             console.error('Error loading user data:', error.message);
@@ -78,8 +80,13 @@ export default function UserProfile() {
                 <div className="flex flex-col items-center mb-8">
                     <div className="relative group cursor-pointer">
                         <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
-                            {avatarUrl ? (
-                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                            {avatarUrl && !imageError ? (
+                                <img
+                                    src={avatarUrl}
+                                    alt="Avatar"
+                                    className="w-full h-full object-cover"
+                                    onError={() => setImageError(true)}
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <User size={64} />
