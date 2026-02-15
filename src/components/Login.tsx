@@ -24,7 +24,9 @@ export default function Login() {
         setIsLoading(true);
 
         try {
-            await (supabase.auth as any).setPersistence(rememberMe ? window.localStorage : window.sessionStorage);
+            // Revert Remember Me change to fix login blocker
+            // console.log('setPersistence:', (supabase.auth as any).setPersistence);
+            // await (supabase.auth as any).setPersistence(rememberMe ? window.localStorage : window.sessionStorage);
 
             const { error } = await supabase.auth.signInWithPassword({
                 email,
@@ -112,20 +114,7 @@ export default function Login() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-2 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${rememberMe ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300 group-hover:border-blue-400'}`}>
-                                    {rememberMe && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                                </div>
-                                <input
-                                    type="checkbox"
-                                    className="hidden"
-                                    checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
-                                />
-                                <span className="text-sm text-gray-600 select-none">Lembrar de mim</span>
-                            </label>
-
+                        <div className="flex items-center justify-end">
                             <a href="#" className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">
                                 Esqueceu a senha?
                             </a>
