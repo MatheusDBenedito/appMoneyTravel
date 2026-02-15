@@ -10,7 +10,7 @@ export default function Login() {
     // Login State
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(true);
+
 
     // SignUp State
     const [newName, setNewName] = useState('');
