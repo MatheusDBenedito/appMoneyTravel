@@ -182,11 +182,21 @@ function AppContent() {
             </div>
 
             <button
-              onClick={() => setIsCreateTripModalOpen(true)}
-              className="bg-blue-600 text-white p-2.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors"
-              title="Nova Viagem"
+              onClick={() => setIsReturnModalOpen(true)}
+              className="bg-green-600 text-white px-4 py-2.5 rounded-xl shadow-md hover:bg-green-700 transition-colors flex items-center gap-2 font-medium"
+              title="Nova Devolução"
+            >
+              <ArrowRightLeft size={20} />
+              <span className="hidden lg:inline">Devolução</span>
+            </button>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-blue-600 text-white px-4 py-2.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium"
+              title="Nova Despesa"
             >
               <Plus size={20} />
+              <span className="hidden lg:inline">Nova Despesa</span>
             </button>
           </div>
         </header>
