@@ -8,6 +8,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.error('Global Error Caught:', message, source, lineno, colno, error);
+        document.body.innerHTML += '<div style="color:red; padding:20px; border:1px solid red; margin:20px;">' +
+          '<h3>Critical Error</h3>' +
+          '<p>' + message + '</p>' +
+          '<p>' + source + ':' + lineno + '</p>' +
+          '</div>';
+      };
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

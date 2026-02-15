@@ -6,8 +6,8 @@ import CreateTripModal from './CreateTripModal';
 
 
 interface SidebarProps {
-    activeTab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports';
-    setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports') => void;
+    activeTab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports' | 'profile';
+    setActiveTab: (tab: 'dashboard' | 'exchange' | 'settings' | 'history' | 'reports' | 'profile') => void;
     className?: string;
 
 }

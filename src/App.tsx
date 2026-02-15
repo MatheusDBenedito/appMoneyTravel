@@ -14,13 +14,32 @@ import PaymentMethodManager from './components/PaymentMethodManager';
 import TripManager from './components/TripManager';
 import WalletCard from './components/WalletCard';
 import Reports from './components/Reports';
+import UserProfile from './components/UserProfile';
 import { ToastProvider } from './context/ToastContext';
-import type { Transaction } from './types'; // Import Transaction type
+import type { Transaction } from './types';
+
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './components/Login';
 
 function AppContent() {
+  const { user, isLoading } = useAuth();
   const { wallets, getWalletBalance, trips, currentTripId, switchTrip } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
+
+
+
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports' | 'profile'>(() => {
+    return (localStorage.getItem('moneytravel_active_tab') as any) || 'dashboard';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('moneytravel_active_tab', activeTab);
+  }, [activeTab]);
+
+  const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
 
   const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -30,17 +49,6 @@ function AppContent() {
       switchTrip(val);
     }
   };
-  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports'>(() => {
-    return (localStorage.getItem('moneytravel_active_tab') as any) || 'dashboard';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('moneytravel_active_tab', activeTab);
-  }, [activeTab]);
-
-  const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
 
   const handleOpenModal = (transaction?: Transaction) => {
     if (transaction) {
@@ -63,43 +71,55 @@ function AppContent() {
     setIsReturnModalOpen(false);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login />;
+  }
+
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
 
-        {/* Desktop Sidebar */}
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          className="hidden md:flex w-64 flex-shrink-0 z-50 shadow-sm"
-        />
+      {/* Desktop Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        className="hidden md:flex w-64 flex-shrink-0 z-50 shadow-sm"
+      />
 
-        {/* Main Content Wrapper */}
-        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+      {/* Main Content Wrapper */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
 
-          {/* Mobile Header (Blue) */}
-          <header className="md:hidden bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg flex-shrink-0">
-            <div className="flex justify-between items-center mb-4">
-              <div className="relative max-w-[70%]">
-                <select
-                  value={currentTripId || ''}
-                  onChange={handleTripChange}
-                  className="appearance-none bg-blue-800/50 text-white border border-blue-500/30 py-2 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 font-bold text-lg truncate w-full"
-                  style={{ backgroundImage: 'none' }}
-                >
-                  {trips.map(trip => (
-                    <option key={trip.id} value={trip.id} className="text-gray-900">
-                      {trip.name}
-                    </option>
-                  ))}
-                  <option disabled className="text-gray-900">──────────</option>
-                  <option value="new_trip" className="text-gray-900">➕ Nova Viagem...</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-blue-200">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-                </div>
+        {/* Mobile Header (Blue) */}
+        <header className="md:hidden bg-blue-600 text-white p-6 rounded-b-3xl shadow-lg flex-shrink-0">
+          <div className="flex justify-between items-center mb-4">
+            <div className="relative max-w-[70%]">
+              <select
+                value={currentTripId || ''}
+                onChange={handleTripChange}
+                className="appearance-none bg-blue-800/50 text-white border border-blue-500/30 py-2 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 font-bold text-lg truncate w-full"
+                style={{ backgroundImage: 'none' }}
+              >
+                {trips.map(trip => (
+                  <option key={trip.id} value={trip.id} className="text-gray-900">
+                    {trip.name}
+                  </option>
+                ))}
+                <option disabled className="text-gray-900">──────────</option>
+                <option value="new_trip" className="text-gray-900">➕ Nova Viagem...</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-blue-200">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
               </div>
+            </div>
 
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveTab('settings')}
                 className="p-2 hover:bg-blue-700 rounded-full transition-colors"
@@ -107,211 +127,256 @@ function AppContent() {
               >
                 <Settings size={20} />
               </button>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className="p-2 hover:bg-blue-700 rounded-full transition-colors"
+                title="Meu Perfil"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-blue-300 flex items-center justify-center text-sm font-bold">
+                  {user?.email?.[0].toUpperCase() || 'U'}
+                </div>
+              </button>
             </div>
+          </div>
 
-            <div className="text-center py-4 relative">
-              <p className="text-blue-100 text-sm mb-1">Saldo Total</p>
-              <div className="flex items-center justify-center gap-2">
-                <h2 className="text-4xl font-bold">${totalBalance.toFixed(2)}</h2>
+          <div className="text-center py-4 relative">
+            <span className="text-blue-100 text-sm font-medium">Saldo Total</span>
+            <h2 className="text-4xl font-bold mt-1">
+              R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </h2>
+          </div>
+        </header>
+
+        {/* Desktop Header/Trip Selector */}
+        <header className="hidden md:flex justify-between items-center p-8 pb-0 max-w-7xl w-full mx-auto">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              {activeTab === 'dashboard' && 'Visão Geral'}
+              {activeTab === 'exchange' && 'Câmbio & Conversão'}
+              {activeTab === 'reports' && 'Relatórios e Análises'}
+              {activeTab === 'history' && 'Histórico de Transações'}
+              {activeTab === 'settings' && 'Ajustes da Viagem'}
+              {activeTab === 'profile' && 'Meu Perfil'}
+            </h1>
+            <p className="text-gray-500 text-sm">Gerencie suas finanças de viagem com facilidade</p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <select
+                value={currentTripId || ''}
+                onChange={handleTripChange}
+                className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-sm hover:border-gray-300 transition-colors"
+              >
+                {trips.map(trip => (
+                  <option key={trip.id} value={trip.id}>
+                    ✈️ {trip.name}
+                  </option>
+                ))}
+                <option disabled>──────────</option>
+                <option value="new_trip">➕ Nova Viagem...</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
               </div>
             </div>
-          </header>
 
-          {/* Desktop Header */}
-          <header className="hidden md:flex justify-between items-center p-8 pb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 capitalize">
-                {activeTab === 'dashboard' ? 'Visão Geral' :
-                  activeTab === 'reports' ? 'Relatórios' :
-                    activeTab === 'exchange' ? 'Câmbio' :
-                      activeTab === 'history' ? 'Histórico' : 'Configurações'}
-              </h1>
-              <p className="text-gray-500 text-sm">Gerencie seus gastos de viagem</p>
+            <button
+              onClick={() => setIsCreateTripModalOpen(true)}
+              className="bg-blue-600 text-white p-2.5 rounded-xl shadow-md hover:bg-blue-700 transition-colors"
+              title="Nova Viagem"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
+        </header>
+
+        <main className="p-4 md:p-8 max-w-7xl w-full mx-auto pb-32 md:pb-8 flex-1">
+          {/* Dashboard Tab */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              {/* Wallets Cards (Horizontal Scroll) */}
+              <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 md:px-0 scrollbar-hide">
+                {wallets.map(wallet => (
+                  <WalletCard
+                    key={wallet.id}
+                    wallet={wallet}
+                    balance={getWalletBalance(wallet.id)}
+                  />
+                ))}
+              </div>
+
+              <div className="grid md:grid-cols-12 gap-6">
+                {/* Left Column: Quick Actions + Charts */}
+                <div className="md:col-span-7 lg:col-span-8 space-y-6">
+                  {/* Quick Actions */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="bg-blue-100 p-2 rounded-full text-blue-600 group-hover:bg-blue-200 transition-colors">
+                        <Plus size={24} />
+                      </div>
+                      <div className="text-left py-2">
+                        <span className="block font-bold text-gray-800">Nova Despesa</span>
+                        <span className="text-xs text-gray-500">Registrar gasto</span>
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setIsReturnModalOpen(true)}
+                      className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="bg-green-100 p-2 rounded-full text-green-600 group-hover:bg-green-200 transition-colors">
+                        <ArrowRightLeft size={24} />
+                      </div>
+                      <div className="text-left py-2">
+                        <span className="block font-bold text-gray-800">Devolução</span>
+                        <span className="text-xs text-gray-500">Receber valor</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                        <PieChart size={20} className="text-blue-500" />
+                        Gastos por Categoria
+                      </h3>
+                    </div>
+                    <div className="h-64 flex items-center justify-center text-gray-400 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                      <span className="text-sm">Gráfico de Rosca aqui</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Recent Activity */}
+                <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
+                  <div className="flex justify-between items-center px-1">
+                    <h3 className="font-bold text-lg text-gray-700">Atividade Recente</h3>
+                    <button
+                      onClick={() => setActiveTab('history')}
+                      className="text-sm text-blue-600 font-medium hover:underline"
+                    >
+                      Ver Tudo
+                    </button>
+                  </div>
+                  <TransactionList limit={5} onTransactionClick={handleOpenModal} />
+                </div>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setIsReturnModalOpen(true)}
-                className="bg-white text-green-600 border border-green-200 px-4 py-3 rounded-xl hover:bg-green-50 hover:border-green-300 transition-all flex items-center gap-2 font-medium"
-              >
-                <ArrowRightLeft size={20} />
-                Devolução
-              </button>
-              <button
-                onClick={() => handleOpenModal()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 hover:scale-105 transition-all flex items-center gap-2 font-medium"
-              >
-                <Plus size={20} />
-                Nova Despesa
-              </button>
-            </div>
-          </header>
+          )}
 
-          {/* Main Content Area */}
-          <main className="flex-1 p-4 md:p-8 pt-0 pb-24 md:pb-8 max-w-7xl mx-auto w-full">
+          {activeTab === 'reports' && <Reports />}
 
-            {/* Wallets & Dashboard */}
-            {activeTab === 'dashboard' && (
+          {activeTab === 'profile' && <UserProfile />}
+
+          {activeTab === 'exchange' && (
+            <section className="max-w-2xl mx-auto">
+              <ExchangeForm />
+            </section>
+          )}
+
+          {activeTab === 'settings' && (
+            <section className="grid md:grid-cols-2 gap-6">
               <div className="space-y-6">
-
-                {/* Desktop Balance Card */}
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 hidden md:flex">
-                  <div>
-                    <p className="text-gray-500 text-sm">Saldo Total da Viagem</p>
-                    <h2 className="text-5xl font-bold text-gray-800">${totalBalance.toFixed(2)}</h2>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  {/* Left Column: Wallets */}
-                  <div className="md:col-span-7 lg:col-span-8 flex flex-col gap-4">
-                    <h3 className="font-bold text-lg text-gray-700 px-1">Carteiras</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {wallets.map(wallet => (
-                        <WalletCard
-                          key={wallet.id}
-                          wallet={wallet}
-                          balance={getWalletBalance(wallet.id)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Right Column: Recent Activity (Desktop only moves here) */}
-                  <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
-                    <div className="flex justify-between items-center px-1">
-                      <h3 className="font-bold text-lg text-gray-700">Atividade Recente</h3>
-                      <button
-                        onClick={() => setActiveTab('history')}
-                        className="text-sm text-blue-600 font-medium hover:underline"
-                      >
-                        Ver Tudo
-                      </button>
-                    </div>
-                    <TransactionList limit={5} onTransactionClick={handleOpenModal} />
-                  </div>
-                </div>
+                <PeopleManager />
+                <PaymentMethodManager />
               </div>
-            )}
+              <div className="space-y-6">
+                <CategoryManager />
+                <TripManager />
+              </div>
+            </section>
+          )}
 
-            {activeTab === 'reports' && <Reports />}
-
-            {/* Exchange Tab */}
-            {activeTab === 'exchange' && (
-              <section className="max-w-2xl mx-auto">
-                <ExchangeForm />
-              </section>
-            )}
-
-            {/* Settings Tab */}
-            {activeTab === 'settings' && (
-              <section className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-6">
-                  <PeopleManager />
-                  <PaymentMethodManager />
-                </div>
-                <div className="space-y-6">
-                  <CategoryManager />
-                  <TripManager />
-                </div>
-              </section>
-            )}
-
-            {/* History Tab */}
-            {activeTab === 'history' && (
-              <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[500px]">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-bold text-lg">Histórico Completo</h3>
-                </div>
-                <TransactionList onTransactionClick={handleOpenModal} />
-              </section>
-            )}
-
-          </main>
-        </div>
-
-        {/* Mobile Floating Action Button (FAB) Group */}
-        <div className="md:hidden fixed bottom-24 right-6 flex flex-col gap-3 z-50">
-          <button
-            onClick={() => setIsReturnModalOpen(true)}
-            className="bg-green-600 text-white p-3 rounded-full shadow-xl hover:bg-green-700 transition-transform active:scale-95 flex items-center justify-center"
-            aria-label="Devolução"
-          >
-            <ArrowRightLeft size={24} />
-          </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-transform active:scale-95 flex items-center justify-center"
-            aria-label="Nova Despesa"
-          >
-            <Plus size={28} />
-          </button>
-        </div>
-
-        {/* Modals */}
-        {isModalOpen && (
-          <AddTransactionModal
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            initialData={selectedTransaction}
-          />
-        )}
-
-        {isReturnModalOpen && (
-          <AddReturnModal
-            isOpen={isReturnModalOpen}
-            onClose={handleCloseModal}
-            initialData={selectedTransaction}
-          />
-        )}
-
-        {/* Mobile Bottom Navigation */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around p-4 pb-6 z-50">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600' : 'text-gray-400'}`}
-          >
-            <Home size={24} />
-            <span className="text-xs font-medium">Início</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('reports')}
-            className={`flex flex-col items-center gap-1 ${activeTab === 'reports' ? 'text-blue-600' : 'text-gray-400'}`}
-          >
-            <PieChart size={24} />
-            <span className="text-xs font-medium">Relatórios</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('exchange')}
-            className={`flex flex-col items-center gap-1 ${activeTab === 'exchange' ? 'text-blue-600' : 'text-gray-400'}`}
-          >
-            <DollarSign size={24} />
-            <span className="text-xs font-medium">Câmbio</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}
-          >
-            <Wallet size={24} />
-            <span className="text-xs font-medium">Histórico</span>
-          </button>
-        </nav>
-
-        {/* Trip Modal */}
-        {isCreateTripModalOpen && (
-          <CreateTripModal onClose={() => setIsCreateTripModalOpen(false)} />
-        )}
+          {activeTab === 'history' && (
+            <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[500px]">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-lg">Histórico Completo</h3>
+              </div>
+              <TransactionList onTransactionClick={handleOpenModal} />
+            </section>
+          )}
+        </main>
       </div>
-    </ToastProvider>
+
+      {/* Mobile Floating Action Button (FAB) Group */}
+      <div className="md:hidden fixed bottom-24 right-6 flex flex-col gap-3 z-50">
+        <button
+          onClick={() => setIsReturnModalOpen(true)}
+          className="bg-green-600 text-white p-3 rounded-full shadow-xl hover:bg-green-700 transition-transform active:scale-95 flex items-center justify-center"
+          title="Registrar Devolução"
+        >
+          <ArrowRightLeft size={24} />
+        </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-transform active:scale-95 flex items-center justify-center"
+          title="Nova Despesa"
+        >
+          <Plus size={28} />
+        </button>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around p-4 pb-6 z-50">
+        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600' : 'text-gray-400'}`}>
+          <Home size={24} />
+          <span className="text-xs font-medium">Início</span>
+        </button>
+        <button onClick={() => setActiveTab('reports')} className={`flex flex-col items-center gap-1 ${activeTab === 'reports' ? 'text-blue-600' : 'text-gray-400'}`}>
+          <PieChart size={24} />
+          <span className="text-xs font-medium">Relatórios</span>
+        </button>
+        <button onClick={() => setActiveTab('exchange')} className={`flex flex-col items-center gap-1 ${activeTab === 'exchange' ? 'text-blue-600' : 'text-gray-400'}`}>
+          <DollarSign size={24} />
+          <span className="text-xs font-medium">Câmbio</span>
+        </button>
+        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}>
+          <Wallet size={24} />
+          <span className="text-xs font-medium">Histórico</span>
+        </button>
+      </nav>
+
+      {/* Modals */}
+      <AddTransactionModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        initialData={selectedTransaction}
+      />
+
+      <AddReturnModal
+        isOpen={isReturnModalOpen}
+        onClose={handleCloseModal}
+        initialData={selectedTransaction}
+      />
+
+      {isCreateTripModalOpen && (
+        <CreateTripModal
+          onClose={() => setIsCreateTripModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function AuthenticatedApp() {
+  const { user } = useAuth();
+  return (
+    <ExpenseProvider key={user?.id}>
+      <AppContent />
+    </ExpenseProvider>
   );
 }
 
 export default function App() {
   return (
-    <ExpenseProvider>
-      <AppContent />
-    </ExpenseProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AuthenticatedApp />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
