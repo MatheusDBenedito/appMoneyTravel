@@ -49,6 +49,7 @@ export default function Login() {
                     data: {
                         full_name: newName,
                     },
+                    emailRedirectTo: `${window.location.origin}`,
                 },
             });
 
