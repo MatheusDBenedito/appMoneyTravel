@@ -1,6 +1,7 @@
 import { useExpenses } from '../context/ExpenseContext';
 // import { useToast } from '../hooks/useToast';
-import { Home, DollarSign, Settings, Wallet, PieChart, Map } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
 
@@ -14,6 +15,7 @@ interface SidebarProps {
 
 export default function Sidebar({ activeTab, setActiveTab, className = '' }: SidebarProps) {
     const { trips, currentTripId, switchTrip } = useExpenses(); // Get trip data
+    const { signOut } = useAuth();
     const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
 
     const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -87,8 +89,15 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
 
             </nav>
 
-            <div className="p-4 border-t border-gray-100">
-                <div className="flex items-center gap-3 px-4 py-3 text-gray-400 text-sm">
+            <div className="p-4 border-t border-gray-100 space-y-4">
+                <button
+                    onClick={signOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                >
+                    <LogOut size={20} />
+                    <span className="font-medium">Sair da Conta</span>
+                </button>
+                <div className="flex items-center gap-3 px-4 text-gray-400 text-sm">
                     <span>v1.0.0</span>
                 </div>
             </div>
