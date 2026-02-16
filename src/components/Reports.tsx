@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { supabase } from '../lib/supabase';
-import { PieChart, TrendingUp, Users, Filter, Briefcase, CreditCard } from 'lucide-react';
+import { PieChart, TrendingUp, Users, Filter, Briefcase, CreditCard, Calendar } from 'lucide-react';
 import type { Transaction, Wallet } from '../types';
 
 export default function Reports() {
@@ -161,154 +161,209 @@ export default function Reports() {
             }));
     }, [transactions, totalSpent]);
 
+    // 6. Daily Breakdown
+    const dailyStats = useMemo(() => {
+        const stats: Record<string, number> = {};
+        transactions.forEach(t => {
+            if (t.type === 'expense') {
+                const dateKeySortable = t.date.toISOString().split('T')[0];
+                stats[dateKeySortable] = (stats[dateKeySortable] || 0) + t.amount;
+            }
+        });
 
-    return (
-        <div className="p-4 md:p-8 space-y-8 pb-24 md:pb-8">
+        return Object.entries(stats)
+            .sort((a, b) => a[0].localeCompare(b[0])) // Sort by date string YYYY-MM-DD
+            .map(([dateIso, value]) => {
+                const [, m, d] = dateIso.split('-');
+                const displayDate = `${d}/${m}`;
+                return {
+                    dateIso,
+                    name: displayDate,
+                    value,
+                };
+            });
+        return (
+            <div className="p-4 md:p-8 space-y-8 pb-24 md:pb-8">
 
-            {/* Header / Trip Selector */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <PieChart className="text-purple-600" />
-                        Relatórios
-                    </h2>
-                    <p className="text-gray-500 text-sm">Análise completa da viagem</p>
-                </div>
-
-                <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm flex items-center gap-2 px-3">
-                    <Briefcase size={16} className="text-gray-500" />
-                    <select
-                        value={selectedTripId || ''}
-                        onChange={(e) => setSelectedTripId(e.target.value)}
-                        className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer py-2 min-w-[150px]"
-                        disabled={isLoading}
-                    >
-                        {trips.map(trip => (
-                            <option key={trip.id} value={trip.id}>
-                                {trip.name} {trip.id === currentTripId ? '(Atual)' : ''}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {isLoading ? (
-                <div className="flex justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                </div>
-            ) : (
-                <>
-                    {/* Total Card */}
-                    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 text-white shadow-xl">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-white/20 rounded-full backdrop-blur-sm">
-                                    <TrendingUp size={24} className="text-white" />
-                                </div>
-                                <div>
-                                    <p className="text-purple-100 text-sm font-medium">Total Gasto na Viagem</p>
-                                    <h2 className="text-4xl font-bold">${totalSpent.toFixed(2)}</h2>
-                                </div>
-                            </div>
-
-                            <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[200px]">
-                                <p className="text-purple-100 text-sm font-medium mb-1">Total em Taxas</p>
-                                <p className="text-2xl font-bold">${totalTax.toFixed(2)}</p>
-                                <p className="text-xs text-purple-200 mt-1">
-                                    {totalSpent > 0 ? ((totalTax / totalSpent) * 100).toFixed(1) : 0}% do total
-                                </p>
-                            </div>
-                        </div>
+                {/* Header / Trip Selector */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <PieChart className="text-purple-600" />
+                            Relatórios
+                        </h2>
+                        <p className="text-gray-500 text-sm">Análise completa da viagem</p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm flex items-center gap-2 px-3">
+                        <Briefcase size={16} className="text-gray-500" />
+                        <select
+                            value={selectedTripId || ''}
+                            onChange={(e) => setSelectedTripId(e.target.value)}
+                            className="bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer py-2 min-w-[150px]"
+                            disabled={isLoading}
+                        >
+                            {trips.map(trip => (
+                                <option key={trip.id} value={trip.id}>
+                                    {trip.name} {trip.id === currentTripId ? '(Atual)' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                        {/* 1. Category Chart */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <Filter size={18} className="text-blue-500" />
-                                Por Categoria
-                            </h3>
-                            <div className="space-y-4">
-                                {categoryStats.map((cat, index) => (
-                                    <div key={cat.name} className="relative">
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="font-medium text-gray-700">{cat.name}</span>
-                                            <span className="text-gray-500">${cat.value.toFixed(2)} ({cat.percentage.toFixed(1)}%)</span>
-                                        </div>
-                                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-blue-500' : 'bg-indigo-500'}`}
-                                                style={{ width: `${cat.percentage}%` }}
-                                            ></div>
-                                        </div>
+                {isLoading ? (
+                    <div className="flex justify-center py-12">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    </div>
+                ) : (
+                    <>
+                        {/* Total Card */}
+                        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 text-white shadow-xl">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-white/20 rounded-full backdrop-blur-sm">
+                                        <TrendingUp size={24} className="text-white" />
                                     </div>
-                                ))}
-                                {categoryStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                                    <div>
+                                        <p className="text-purple-100 text-sm font-medium">Total Gasto na Viagem</p>
+                                        <h2 className="text-4xl font-bold">${totalSpent.toFixed(2)}</h2>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[200px]">
+                                    <p className="text-purple-100 text-sm font-medium mb-1">Total em Taxas</p>
+                                    <p className="text-2xl font-bold">${totalTax.toFixed(2)}</p>
+                                    <p className="text-xs text-purple-200 mt-1">
+                                        {totalSpent > 0 ? ((totalTax / totalSpent) * 100).toFixed(1) : 0}% do total
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        {/* 2. Payment Method Chart */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <CreditCard size={18} className="text-purple-500" />
-                                Por Forma de Pagamento
-                            </h3>
-                            <div className="space-y-4">
-                                {paymentMethodStats.map((method, index) => (
-                                    <div key={method.name} className="relative">
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="font-medium text-gray-700">{method.name}</span>
-                                            <span className="text-gray-500">${method.value.toFixed(2)} ({method.percentage.toFixed(1)}%)</span>
-                                        </div>
-                                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-purple-500' : 'bg-pink-500'}`}
-                                                style={{ width: `${method.percentage}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                ))}
-                                {paymentMethodStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
-                            </div>
-                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-                        {/* 3. Person Consumption Chart */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <Users size={18} className="text-green-500" />
-                                Gastos por Pessoa (Consumo)
-                            </h3>
-                            <p className="text-xs text-gray-400 mb-4">
-                                Reflete quem "usufruiu" do dinheiro, considerando a divisão das contas.
-                            </p>
-                            <div className="space-y-4">
-                                {consumptionStats.map((person, index) => (
-                                    <div key={person.id} className="group">
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-2 h-2 rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}></div>
-                                                <span className="font-medium text-gray-700">{person.name}</span>
+                            {/* 0. Daily History Chart (Span Full Width) */}
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:col-span-2">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <Calendar size={18} className="text-indigo-500" />
+                                    Gastos por Dia
+                                </h3>
+                                <div className="flex items-end gap-2 overflow-x-auto pb-2 no-scrollbar h-48">
+                                    {dailyStats.map((day) => (
+                                        <div key={day.dateIso} className="flex flex-col items-center gap-2 min-w-[40px] group relative">
+
+                                            {/* Tooltip */}
+                                            <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
+                                                {day.name}: ${day.value.toFixed(2)}
                                             </div>
-                                            <span className="text-gray-500 font-mono">${person.value.toFixed(2)}</span>
-                                        </div>
-                                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+
                                             <div
-                                                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}
-                                                style={{ width: `${person.percentage}%` }}
+                                                className="w-8 bg-indigo-100 rounded-t-lg relative group-hover:bg-indigo-200 transition-colors"
+                                                style={{ height: `${maxDailySpend > 0 ? (day.value / maxDailySpend) * 100 : 0}%` }}
+                                            >
+                                                <div className="absolute bottom-0 w-full bg-indigo-500 rounded-t-lg transition-all duration-500" style={{ height: '0%' }}></div>
+                                                {/* Simple bar for now */}
+                                            </div>
+                                            {/* Re-implementing bar with just one div for simplicity */}
+                                            <div
+                                                className="w-8 bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600"
+                                                style={{ height: `${maxDailySpend > 0 ? (day.value / maxDailySpend) * 100 : 0}%`, minHeight: '4px' }}
                                             ></div>
+
+                                            <span className="text-xs text-gray-500 font-medium rotate-0">{day.name}</span>
                                         </div>
-                                    </div>
-                                ))}
-                                {consumptionStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                                    ))}
+                                    {dailyStats.length === 0 && <p className="text-gray-400 text-center w-full py-12">Nenhum dado.</p>}
+                                </div>
                             </div>
+
+                            {/* 1. Category Chart */}
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <Filter size={18} className="text-blue-500" />
+                                    Por Categoria
+                                </h3>
+                                <div className="space-y-4">
+                                    {categoryStats.map((cat, index) => (
+                                        <div key={cat.name} className="relative">
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="font-medium text-gray-700">{cat.name}</span>
+                                                <span className="text-gray-500">${cat.value.toFixed(2)} ({cat.percentage.toFixed(1)}%)</span>
+                                            </div>
+                                            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${index % 2 === 0 ? 'bg-blue-500' : 'bg-indigo-500'}`}
+                                                    style={{ width: `${cat.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {categoryStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                                </div>
+                            </div>
+
+                            {/* 2. Payment Method Chart */}
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <CreditCard size={18} className="text-purple-500" />
+                                    Por Forma de Pagamento
+                                </h3>
+                                <div className="space-y-4">
+                                    {paymentMethodStats.map((method, index) => (
+                                        <div key={method.name} className="relative">
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <span className="font-medium text-gray-700">{method.name}</span>
+                                                <span className="text-gray-500">${method.value.toFixed(2)} ({method.percentage.toFixed(1)}%)</span>
+                                            </div>
+                                            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${index % 2 === 0 ? 'bg-purple-500' : 'bg-pink-500'}`}
+                                                    style={{ width: `${method.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {paymentMethodStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                                </div>
+                            </div>
+
+                            {/* 3. Person Consumption Chart */}
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                    <Users size={18} className="text-green-500" />
+                                    Gastos por Pessoa (Consumo)
+                                </h3>
+                                <p className="text-xs text-gray-400 mb-4">
+                                    Reflete quem "usufruiu" do dinheiro, considerando a divisão das contas.
+                                </p>
+                                <div className="space-y-4">
+                                    {consumptionStats.map((person, index) => (
+                                        <div key={person.id} className="group">
+                                            <div className="flex justify-between text-sm mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-2 h-2 rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}></div>
+                                                    <span className="font-medium text-gray-700">{person.name}</span>
+                                                </div>
+                                                <span className="text-gray-500 font-mono">${person.value.toFixed(2)}</span>
+                                            </div>
+                                            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}
+                                                    style={{ width: `${person.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {consumptionStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                                </div>
+                            </div>
+
+
+
                         </div>
-
-
-
-                    </div>
-                </>
-            )}
-        </div>
-    );
-}
+                    </>
+                )}
+            </div>
+        );
+    }

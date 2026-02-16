@@ -21,7 +21,15 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
     const [receiver, setReceiver] = useState<WalletType>(wallets[0]?.id || '');
     const [category, setCategory] = useState('');
     const [isShared, setIsShared] = useState(false);
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+    // Helper to get local date string YYYY-MM-DD
+    const getLocalDateString = (dateObj: Date) => {
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const [date, setDate] = useState(getLocalDateString(new Date()));
 
     // Confirm Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -35,7 +43,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             setIsShared(initialData.isShared);
             setCategory(initialData.category);
             if (initialData.date) {
-                setDate(new Date(initialData.date).toISOString().split('T')[0]);
+                setDate(getLocalDateString(new Date(initialData.date)));
             }
         } else {
             // Default to first category available
@@ -62,7 +70,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             // Try to find 'General' or 'Outros', otherwise first one
             const defaultCat = categories.find(c => c.name === 'Geral' || c.name === 'General' || c.name === 'Outros') || categories[0];
             setCategory(defaultCat?.name || '');
-            setDate(new Date().toISOString().split('T')[0]);
+            setDate(getLocalDateString(new Date()));
         }
     }, [isOpen, initialData, categories]);
 
@@ -70,6 +78,9 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
         if (!amount || !description || !category) return;
 
         try {
+            // Construct date at noon to ensure timezone stability
+            const transactionDate = new Date(`${date}T12:00:00`);
+
             const transactionData = {
                 amount: parseFloat(amount),
                 description,
@@ -78,7 +89,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                 isShared,
                 paymentMethod: 'Cash', // Default
                 type: 'income' as const,
-                date: new Date(date),
+                date: transactionDate,
             };
 
             if (initialData) {
