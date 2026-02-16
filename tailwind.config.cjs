@@ -4,7 +4,7 @@ module.exports = {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
-    darkMode: 'selector', // or 'class'
+    darkMode: ['selector', '[data-mode="always-dark"]'], // Force disabling by using a non-existent selector
     theme: {
         extend: {},
     },
