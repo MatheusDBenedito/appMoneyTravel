@@ -12,8 +12,8 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, balance }) => {
     const isMe = wallet.id === 'me';
 
     // No changes needed yet, just verifying.d
-    const used = wallet.budget - balance;
-    const percentage = Math.min(100, Math.max(0, (used / wallet.budget) * 100));
+    // Simplified view, no budget bar for now
+
 
     return (
         <div className={clsx(
@@ -45,16 +45,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ wallet, balance }) => {
                 </p>
             </div>
 
-            <div className="mt-3 w-full bg-gray-100 rounded-full h-1.5">
-                <div
-                    className={clsx(
-                        "h-1.5 rounded-full transition-all duration-500",
-                        isMe ? "bg-blue-500" : "bg-pink-500",
-                        balance < 0 && "bg-red-500"
-                    )}
-                    style={{ width: `${percentage}%` }}
-                />
-            </div>
+
         </div>
     );
 };
