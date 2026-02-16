@@ -84,10 +84,17 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
 
             // Determine Active Trip
             let activeTripId = currentTripId;
-            if (!activeTripId && loadedTrips.length > 0) {
-                // Default to most recent or first
-                activeTripId = loadedTrips[0].id;
-                setCurrentTripId(activeTripId);
+            const tripExists = loadedTrips.some(t => t.id === activeTripId);
+
+            if (!activeTripId || !tripExists) {
+                if (loadedTrips.length > 0) {
+                    // Default to most recent or first
+                    activeTripId = loadedTrips[0].id;
+                    setCurrentTripId(activeTripId);
+                } else {
+                    activeTripId = null;
+                    setCurrentTripId(null);
+                }
             }
 
             // If still no trip (e.g. no trips exist, creating first one handled elsewhere or empty state), stop here?
