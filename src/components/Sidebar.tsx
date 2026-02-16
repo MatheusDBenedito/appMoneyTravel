@@ -94,18 +94,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
             </nav>
 
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
-                <button
-                    onClick={toggleTheme}
-                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
-                >
-                    <div className="flex items-center gap-3">
-                        {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-                        <span className="font-medium">Modo Escuro</span>
-                    </div>
-                    <div className={`w-10 h-5 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}`}>
-                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${theme === 'dark' ? 'left-6' : 'left-1'}`} />
-                    </div>
-                </button>
+                {/* Dark Mode Toggle Removed */}
 
                 <button
                     onClick={signOut}
