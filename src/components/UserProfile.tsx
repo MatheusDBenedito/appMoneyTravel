@@ -77,6 +77,12 @@ export default function UserProfile() {
             return;
         }
         const file = e.target.files[0];
+
+        if (file.size > 1024 * 1024) {
+            showToast('A imagem deve ter no máximo 1MB.', 'error');
+            return;
+        }
+
         try {
             setUploading(true);
             const publicUrl = await uploadAvatar(file);

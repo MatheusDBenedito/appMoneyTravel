@@ -155,7 +155,12 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                     step="0.01"
                                     inputMode="decimal"
                                     value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val.length <= 7) {
+                                            setAmount(val);
+                                        }
+                                    }}
                                     className="w-full pl-8 pr-4 py-3 bg-green-50 border border-green-200 rounded-xl text-3xl font-bold text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400"
                                     placeholder="0,00"
                                     autoFocus={!initialData}

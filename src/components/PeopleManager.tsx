@@ -25,6 +25,12 @@ export default function PeopleManager() {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0];
 
+            if (selectedFile.size > 1024 * 1024) {
+                showToast('A imagem deve ter no máximo 1MB.', 'error');
+                e.target.value = '';
+                return;
+            }
+
             if (walletId) {
                 // Determine if we are updating an existing wallet directly
                 setUploadingId(walletId);
@@ -166,7 +172,12 @@ export default function PeopleManager() {
                                                     type="number"
                                                     step="0.01"
                                                     value={editBudget}
-                                                    onChange={(e) => setEditBudget(e.target.value)}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val.length <= 8) { // slightly more for decimals
+                                                            setEditBudget(val);
+                                                        }
+                                                    }}
                                                     className="flex-1 min-w-0 text-xs p-1 bg-gray-50 border border-transparent hover:border-gray-200 rounded focus:outline-none focus:border-purple-300 focus:bg-white transition-colors dark:bg-gray-600 dark:text-gray-200 dark:hover:border-gray-500 dark:focus:bg-gray-700"
                                                     placeholder="Definir Saldo Atual"
                                                     title="Ao alterar este valor, o Saldo Inicial será reajustado automaticamente para atingir o valor desejado."

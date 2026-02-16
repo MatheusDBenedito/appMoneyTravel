@@ -181,7 +181,12 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                                         inputMode="decimal"
                                         value={amount}
                                         onKeyDown={handleAmountKeyDown}
-                                        onChange={(e) => setAmount(e.target.value)}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val.length <= 7) {
+                                                setAmount(val);
+                                            }
+                                        }}
                                         className="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-3xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                                         placeholder="0,00"
                                         autoFocus={!initialData} // Only autofocus on new

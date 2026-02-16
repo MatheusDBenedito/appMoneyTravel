@@ -106,7 +106,12 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
                                 step="0.01"
                                 inputMode="decimal"
                                 value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val.length <= 7) {
+                                        setAmount(val);
+                                    }
+                                }}
                                 className={clsx(
                                     "w-full pl-16 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-4xl font-bold focus:outline-none focus:ring-2 text-center dark:bg-gray-800 dark:border-gray-700",
                                     operation === 'add' ? "focus:ring-green-500 text-green-600 dark:text-green-400" : "focus:ring-red-500 text-red-600 dark:text-red-400"

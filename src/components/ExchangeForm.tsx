@@ -130,7 +130,17 @@ export default function ExchangeForm() {
                             type="text"
                             inputMode="numeric"
                             value={formatCurrency(originValue)}
-                            onChange={(e) => handleInputChange(e, setOriginValue)}
+                            onChange={(e) => {
+                                let val = e.target.value;
+                                // Remove non-digit chars for length check purposes (approximate) or just check raw length
+                                // The handleInputChange validation logic is:
+                                // let value = e.target.value; value = value.replace(/\D/g, ''); setter(value);
+                                // We can wrap handleInputChange
+                                const raw = e.target.value.replace(/\D/g, '');
+                                if (raw.length <= 7) {
+                                    handleInputChange(e, setOriginValue);
+                                }
+                            }}
                             className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
                             placeholder="0,00"
                             required
@@ -165,7 +175,12 @@ export default function ExchangeForm() {
                             type="text"
                             inputMode="numeric"
                             value={formatCurrency(targetValue)}
-                            onChange={(e) => handleInputChange(e, setTargetValue)}
+                            onChange={(e) => {
+                                const raw = e.target.value.replace(/\D/g, '');
+                                if (raw.length <= 7) {
+                                    handleInputChange(e, setTargetValue);
+                                }
+                            }}
                             className="w-full pl-10 pr-4 py-3 bg-green-50 rounded-xl border-green-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg text-green-700"
                             placeholder="0,00"
                             required

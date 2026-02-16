@@ -83,7 +83,12 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
                             type="number"
                             step="0.01"
                             value={originAmount}
-                            onChange={(e) => setOriginAmount(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val.length <= 7) {
+                                    setOriginAmount(val);
+                                }
+                            }}
                             className="w-full px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             required
                         />
@@ -102,7 +107,12 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
                             type="number"
                             step="0.01"
                             value={targetAmount}
-                            onChange={(e) => setTargetAmount(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val.length <= 7) {
+                                    setTargetAmount(val);
+                                }
+                            }}
                             className="w-full px-4 py-3 bg-green-50 rounded-xl border-green-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg text-green-700 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400"
                             required
                         />
