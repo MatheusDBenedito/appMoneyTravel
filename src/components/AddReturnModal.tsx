@@ -166,6 +166,18 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                             />
                         </div>
 
+                        {/* Date */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-500 mb-1">Data</label>
+                            <input
+                                type="date"
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700"
+                                required
+                            />
+                        </div>
+
                         {/* Category Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-500 mb-1">Categoria</label>
