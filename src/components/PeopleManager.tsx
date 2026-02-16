@@ -4,6 +4,8 @@ import { useToast } from '../hooks/useToast';
 import { Trash2, UserPlus, Users, Pencil, Check, X, Camera, User, DollarSign } from 'lucide-react';
 import { clsx } from 'clsx';
 
+import ConfirmModal from './ConfirmModal'; // Import Modal
+
 export default function PeopleManager() {
     const { wallets, addWallet, removeWallet, renameWallet, getWalletBalance, uploadAvatar, updateWalletAvatar, updateWalletDivision, updateBudget } = useExpenses();
     const { showToast } = useToast();
@@ -16,6 +18,7 @@ export default function PeopleManager() {
     const [file, setFile] = useState<File | null>(null); // For new wallet
     const [includedInDivision, setIncludedInDivision] = useState(true); // New state
     const [uploadingId, setUploadingId] = useState<string | null>(null); // For existing wallet
+    const [walletToDelete, setWalletToDelete] = useState<{ id: string, name: string } | null>(null); // State for delete modal
 
     // Helper to trigger hidden file input from the list (edit mode)
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, walletId?: string) => {
@@ -106,6 +109,14 @@ export default function PeopleManager() {
 
         setEditingId(null);
         setEditName('');
+    };
+
+    const confirmDelete = () => {
+        if (walletToDelete) {
+            removeWallet(walletToDelete.id);
+            setWalletToDelete(null);
+            showToast(`"${walletToDelete.name}" removido com sucesso!`, 'success');
+        }
     };
 
     return (
@@ -231,10 +242,9 @@ export default function PeopleManager() {
                                                 setErrorId(wallet.id);
                                                 return;
                                             }
-                                            if (confirm(`Remover "${wallet.name}"?`)) {
-                                                removeWallet(wallet.id);
-                                                setErrorId(null);
-                                            }
+                                            // Open Modal instead of window.confirm
+                                            setWalletToDelete({ id: wallet.id, name: wallet.name });
+                                            setErrorId(null);
                                         }}
                                         className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     >
@@ -302,6 +312,15 @@ export default function PeopleManager() {
                     </label>
                 </div>
             </form>
-        </div>
+            <ConfirmModal
+                isOpen={!!walletToDelete}
+                onClose={() => setWalletToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Remover Pessoa"
+                message={`Tem certeza que deseja remover "${walletToDelete?.name}"? Esta ação não pode ser desfeita.`}
+                confirmText="Remover"
+                isDestructive={true}
+            />
+        </div >
     );
 }

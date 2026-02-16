@@ -77,7 +77,7 @@ export default function CategoryManager() {
                     const Icon = getIcon(category.icon);
 
                     return (
-                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 overflow-x-auto">
+                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
 
                             {isEditing ? (
                                 <div className="flex flex-col gap-2 flex-1 mr-2">
@@ -93,7 +93,7 @@ export default function CategoryManager() {
                                             </button>
 
                                             {showEditIconPicker && (
-                                                <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-10 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
+                                                <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
                                                     {availableIcons.map(iconName => (
                                                         <button
                                                             key={iconName}
@@ -192,7 +192,7 @@ export default function CategoryManager() {
                         </button>
 
                         {showIconPicker && (
-                            <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-10 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
+                            <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
                                 {availableIcons.map(iconName => (
                                     <button
                                         key={iconName}
