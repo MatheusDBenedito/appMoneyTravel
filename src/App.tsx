@@ -219,35 +219,6 @@ function AppContent() {
               <div className="grid md:grid-cols-12 gap-6">
                 {/* Left Column: Quick Actions + Charts */}
                 <div className="md:col-span-7 lg:col-span-8 space-y-6">
-                  {/* Quick Actions */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 hover:bg-gray-50 transition-colors group"
-                    >
-                      <div className="bg-blue-100 p-2 rounded-full text-blue-600 group-hover:bg-blue-200 transition-colors">
-                        <Plus size={24} />
-                      </div>
-                      <div className="text-left py-2">
-                        <span className="block font-bold text-gray-800">Nova Despesa</span>
-                        <span className="text-xs text-gray-500">Registrar gasto</span>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setIsReturnModalOpen(true)}
-                      className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center gap-3 hover:bg-gray-50 transition-colors group"
-                    >
-                      <div className="bg-green-100 p-2 rounded-full text-green-600 group-hover:bg-green-200 transition-colors">
-                        <ArrowRightLeft size={24} />
-                      </div>
-                      <div className="text-left py-2">
-                        <span className="block font-bold text-gray-800">Devolução</span>
-                        <span className="text-xs text-gray-500">Receber valor</span>
-                      </div>
-                    </button>
-                  </div>
-
                   <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
