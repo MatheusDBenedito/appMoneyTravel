@@ -20,13 +20,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const root = window.document.documentElement;
-        console.log('ThemeContext useEffect. Applying theme:', theme);
 
-        // Remove both to ensure clean state
-        root.classList.remove('light', 'dark');
-
-        // Add current theme
-        root.classList.add(theme);
+        // Standard Tailwind Approach:
+        // If dark, add 'dark'. If light, remove 'dark'.
+        if (theme === 'dark') {
+            root.classList.add('dark');
+        } else {
+            root.classList.remove('dark');
+        }
 
         // Save to local storage
         localStorage.setItem('moneytravel_theme', theme);
@@ -37,12 +38,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }, [theme]);
 
     const toggleTheme = () => {
-        console.log('Toggling theme. Current:', theme);
-        setTheme(prev => {
-            const newTheme = prev === 'light' ? 'dark' : 'light';
-            console.log('New theme:', newTheme);
-            return newTheme;
-        });
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
 
     return (
