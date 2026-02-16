@@ -42,7 +42,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
         { id: 'settings', label: 'Configurações', icon: Settings },
     ] as const;
 
-    const { theme, toggleTheme } = useTheme();
+
 
     return (
         <aside className={`bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col h-screen sticky top-0 ${className}`}>
