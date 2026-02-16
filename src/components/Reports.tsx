@@ -333,31 +333,37 @@ export default function Reports() {
                                 <Users size={18} className="text-green-500" />
                                 Gastos por Pessoa (Consumo)
                             </h3>
-                            <div className="flex justify-between text-sm mb-1">
-                                <div className="flex items-center gap-2">
-                                    <div className={`w-2 h-2 rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}></div>
-                                    <span className="font-medium text-gray-700">{person.name}</span>
-                                </div>
-                                <span className="text-gray-500 font-mono">${person.value.toFixed(2)}</span>
-                            </div>
-                            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}
-                                    style={{ width: `${person.percentage}%` }}
-                                ></div>
+                            <p className="text-xs text-gray-400 mb-4">
+                                Reflete quem "usufruiu" do dinheiro, considerando a divisão das contas.
+                            </p>
+                            <div className="space-y-4">
+                                {consumptionStats.map((person, index) => (
+                                    <div key={person.id} className="group">
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}></div>
+                                                <span className="font-medium text-gray-700">{person.name}</span>
+                                            </div>
+                                            <span className="text-gray-500 font-mono">${person.value.toFixed(2)}</span>
+                                        </div>
+                                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-green-500' : 'bg-teal-500'}`}
+                                                style={{ width: `${person.percentage}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {consumptionStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
                             </div>
                         </div>
-                                ))}
-                        {consumptionStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+
+
+
                     </div>
-                </div>
-
-
-
-        </div>
                 </>
             )
-}
+            }
         </div >
     );
 }
