@@ -11,11 +11,18 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const [theme, setTheme] = useState<Theme>(() => {
-        const savedTheme = localStorage.getItem('moneytravel_theme');
-        if (savedTheme === 'light' || savedTheme === 'dark') {
-            return savedTheme;
+        // Safe check for localStorage availability
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const savedTheme = localStorage.getItem('moneytravel_theme');
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                return savedTheme;
+            }
         }
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        // Default to dark if system prefers or fallback
+        if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
     });
 
     useEffect(() => {
