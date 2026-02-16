@@ -40,19 +40,12 @@ export default defineConfig({
       }
     })
   ],
-  postcss: {
-    plugins: [
-      tailwindcss({
-        config: {
-          content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-          darkMode: ['selector', '[data-mode="always-dark"]'], // Force disable
-          theme: {
-            extend: {},
-          },
-          plugins: [],
-        }
-      }),
-      autoprefixer(),
-    ],
+  css: {
+    postcss: {
+      plugins: [
+        tailwindcss(),
+        autoprefixer(),
+      ],
+    },
   },
 })
