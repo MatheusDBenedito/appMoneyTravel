@@ -131,14 +131,14 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
     return (
         <>
             <div className="fixed inset-0 bg-black/50 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
-                <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300 max-h-[90vh] overflow-y-auto">
+                <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300 max-h-[90vh] overflow-y-auto dark:bg-gray-900">
 
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 dark:text-gray-100">
                             <ArrowRightLeft className="text-green-600" />
                             {initialData ? 'Editar Devolução' : 'Nova Devolução'}
                         </h2>
-                        <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
+                        <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400">
                             <X size={20} />
                         </button>
                     </div>
@@ -147,7 +147,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
 
                         {/* Amount Input */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-1">Valor Devolvido</label>
+                            <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Valor Devolvido</label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500 font-bold">$</span>
                                 <input
@@ -156,7 +156,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                     inputMode="decimal"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full pl-8 pr-4 py-3 bg-green-50 border border-green-200 rounded-xl text-3xl font-bold text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                    className="w-full pl-8 pr-4 py-3 bg-green-50 border border-green-200 rounded-xl text-3xl font-bold text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400"
                                     placeholder="0,00"
                                     autoFocus={!initialData}
                                     required
@@ -166,12 +166,12 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
 
                         {/* Description */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-1">Motivo</label>
+                            <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Motivo</label>
                             <input
                                 type="text"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                                 placeholder="Ex: Troco do jantar, Reembolso"
                                 required
                             />
@@ -179,19 +179,19 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
 
                         {/* Date */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-1">Data</label>
+                            <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Data</label>
                             <input
                                 type="date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                                 required
                             />
                         </div>
 
                         {/* Category Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-500 mb-1">Categoria</label>
+                            <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Categoria</label>
                             <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                                 {categories.map(cat => (
                                     <button
@@ -201,8 +201,8 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                         className={clsx(
                                             "px-3 py-1.5 rounded-lg text-sm font-medium border transition-all whitespace-nowrap flex items-center gap-2",
                                             category === cat.name
-                                                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
-                                                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                                                ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400"
+                                                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                                         )}
                                     >
                                         <span>{cat.name}</span>
@@ -212,12 +212,12 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                         </div>
 
                         {/* Receiver & Shared Toggle */}
-                        <div className="p-4 bg-gray-50 rounded-xl space-y-4">
+                        <div className="p-4 bg-gray-50 rounded-xl space-y-4 dark:bg-gray-800/50">
 
                             {!isShared && (
                                 <div className="flex flex-col gap-2 mb-4">
-                                    <span className="text-sm font-medium text-gray-600">Recebido por</span>
-                                    <div className="flex bg-white rounded-lg p-1 border shadow-sm overflow-x-auto no-scrollbar">
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Recebido por</span>
+                                    <div className="flex bg-white rounded-lg p-1 border shadow-sm overflow-x-auto no-scrollbar dark:bg-gray-800 dark:border-gray-700">
                                         {wallets.map(w => (
                                             <button
                                                 key={w.id}
@@ -225,7 +225,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                                 onClick={() => setReceiver(w.id)}
                                                 className={clsx(
                                                     "flex-1 px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
-                                                    receiver === w.id ? "bg-green-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+                                                    receiver === w.id ? "bg-green-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
                                                 )}
                                             >
                                                 {w.name}
@@ -235,9 +235,9 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                 </div>
                             )}
 
-                            <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-gray-600">Dividir p/ Todos</span>
+                                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Dividir p/ Todos</span>
                                 </div>
                                 <button
                                     type="button"
@@ -266,7 +266,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                                 <button
                                     type="button"
                                     onClick={() => setIsDeleteModalOpen(true)}
-                                    className="p-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 active:scale-95 transition-transform flex items-center justify-center"
+                                    className="p-4 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 active:scale-95 transition-transform flex items-center justify-center dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
                                     title="Excluir Devolução"
                                 >
                                     <Trash2 size={20} />

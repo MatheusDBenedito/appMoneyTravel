@@ -23,7 +23,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
 
     if (transactions.length === 0) {
         return (
-            <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed">
+            <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed dark:bg-gray-900 dark:border-gray-800 dark:text-gray-500">
                 <p>Nenhuma transação ainda</p>
             </div>
         );
@@ -38,17 +38,17 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                         key={t.id}
                         onClick={() => onTransactionClick?.(t)}
                         className={clsx(
-                            "bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between",
-                            onTransactionClick && "cursor-pointer hover:bg-gray-50 active:scale-[0.99] transition-all"
+                            "bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between dark:bg-gray-900 dark:border-gray-800",
+                            onTransactionClick && "cursor-pointer hover:bg-gray-50 active:scale-[0.99] transition-all dark:hover:bg-gray-800"
                         )}
                     >
                         <div className="flex items-center gap-3">
-                            <div className={clsx("p-2 rounded-full bg-gray-100 text-gray-600")}>
+                            <div className={clsx("p-2 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300")}>
                                 {getCategoryIcon(t.category)}
                             </div>
                             <div>
-                                <p className="font-medium text-gray-800">{t.description}</p>
-                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                <p className="font-medium text-gray-800 dark:text-gray-200">{t.description}</p>
+                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 dark:text-gray-400">
                                     <span>{new Date(t.date).toLocaleDateString()}</span>
 
                                     {/* Avatars Section */}
@@ -91,7 +91,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
                                 </div>
                             </div>
                         </div>
-                        <span className={clsx("font-bold", t.type === 'income' ? "text-green-600" : "text-gray-800")}>
+                        <span className={clsx("font-bold", t.type === 'income' ? "text-green-600 dark:text-green-400" : "text-gray-800 dark:text-gray-200")}>
                             {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
                         </span>
                     </div>

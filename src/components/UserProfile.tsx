@@ -97,15 +97,15 @@ export default function UserProfile() {
 
     return (
         <div className="max-w-2xl mx-auto p-4 md:p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
-                <User className="text-blue-600" size={32} />
+            <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3 dark:text-gray-100">
+                <User className="text-blue-600 dark:text-blue-400" size={32} />
                 Meu Perfil
             </h2>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 dark:bg-gray-900 dark:border-gray-800">
                 <div className="flex flex-col items-center mb-8">
                     <div className="relative group cursor-pointer">
-                        <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+                        <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
                             {avatarUrl && !imageError ? (
                                 <img
                                     src={avatarUrl}
@@ -114,7 +114,7 @@ export default function UserProfile() {
                                     onError={() => setImageError(true)}
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
                                     <User size={64} />
                                 </div>
                             )}
@@ -136,27 +136,27 @@ export default function UserProfile() {
                             />
                         </label>
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">Clique na foto para alterar</p>
+                    <p className="text-sm text-gray-500 mt-2 dark:text-gray-400">Clique na foto para alterar</p>
                 </div>
 
                 <div className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-2">E-mail</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-2 dark:text-gray-400">E-mail</label>
                         <input
                             type="text"
                             value={user?.email}
                             disabled
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-2">Nome Completo</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-2 dark:text-gray-400">Nome Completo</label>
                         <input
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-medium dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             placeholder="Como você quer ser chamado?"
                         />
                     </div>
@@ -174,7 +174,7 @@ export default function UserProfile() {
 
                     <button
                         onClick={signOut}
-                        className="w-full py-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-200 transform transition-all active:scale-95 flex items-center justify-center gap-2 mt-2"
+                        className="w-full py-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-200 transform transition-all active:scale-95 flex items-center justify-center gap-2 mt-2 dark:bg-red-900/20 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-900/30"
                     >
                         <LogOut size={20} />
                         Sair da Conta

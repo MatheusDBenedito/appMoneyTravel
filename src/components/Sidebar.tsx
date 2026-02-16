@@ -1,7 +1,8 @@
 import { useExpenses } from '../context/ExpenseContext';
 // import { useToast } from '../hooks/useToast';
 import { useAuth } from '../context/AuthContext';
-import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut, User } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut, User, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
 
@@ -41,8 +42,10 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
         { id: 'settings', label: 'Configurações', icon: Settings },
     ] as const;
 
+    const { theme, toggleTheme } = useTheme();
+
     return (
-        <aside className={`bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 ${className}`}>
+        <aside className={`bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col h-screen sticky top-0 ${className}`}>
             <div className="p-6 border-b border-gray-100 space-y-4">
                 <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
                     <span className="bg-blue-600 text-white p-1 rounded-lg">
@@ -56,7 +59,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
                     <select
                         value={currentTripId || ''}
                         onChange={handleTripChange}
-                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 px-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-sm truncate"
+                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 px-3 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium text-sm truncate dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
                     >
                         {trips.map(trip => (
                             <option key={trip.id} value={trip.id}>
@@ -78,8 +81,8 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
                         key={item.id}
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
-                            ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                            ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm dark:bg-blue-900/20 dark:text-blue-400'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200'
                             }`}
                     >
                         <item.icon size={20} />
@@ -90,10 +93,23 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
 
             </nav>
 
-            <div className="p-4 border-t border-gray-100 space-y-4">
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
+                <button
+                    onClick={toggleTheme}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors"
+                >
+                    <div className="flex items-center gap-3">
+                        {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                        <span className="font-medium">Modo Escuro</span>
+                    </div>
+                    <div className={`w-10 h-5 rounded-full relative transition-colors ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-300'}`}>
+                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${theme === 'dark' ? 'left-6' : 'left-1'}`} />
+                    </div>
+                </button>
+
                 <button
                     onClick={signOut}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                     <LogOut size={20} />
                     <span className="font-medium">Sair da Conta</span>

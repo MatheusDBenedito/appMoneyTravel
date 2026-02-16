@@ -17,6 +17,7 @@ import WalletCard from './components/WalletCard';
 import Reports from './components/Reports';
 import UserProfile from './components/UserProfile';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import type { Transaction } from './types';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -112,7 +113,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans flex">
 
       {/* Desktop Sidebar */}
       <Sidebar
@@ -178,7 +179,7 @@ function AppContent() {
         {/* Desktop Header/Trip Selector */}
         <header className="hidden md:flex justify-between items-center p-8 pb-0 max-w-7xl w-full mx-auto">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
               {activeTab === 'dashboard' && 'Visão Geral'}
               {activeTab === 'exchange' && 'Câmbio & Conversão'}
               {activeTab === 'reports' && 'Relatórios e Análises'}
@@ -186,7 +187,7 @@ function AppContent() {
               {activeTab === 'settings' && 'Ajustes da Viagem'}
               {activeTab === 'profile' && 'Meu Perfil'}
             </h1>
-            <p className="text-gray-500 text-sm">Gerencie suas finanças de viagem com facilidade</p>
+            <p className="text-gray-500 text-sm dark:text-gray-400">Gerencie suas finanças de viagem com facilidade</p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -194,7 +195,7 @@ function AppContent() {
               <select
                 value={currentTripId || ''}
                 onChange={handleTripChange}
-                className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-sm hover:border-gray-300 transition-colors"
+                className="appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 px-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium shadow-sm hover:border-gray-300 transition-colors dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:border-gray-600"
               >
                 {trips.map(trip => (
                   <option key={trip.id} value={trip.id}>
@@ -247,9 +248,9 @@ function AppContent() {
               <div className="grid md:grid-cols-12 gap-6">
                 {/* Left Column: Quick Actions + Charts */}
                 <div className="md:col-span-7 lg:col-span-8 space-y-6">
-                  <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                  <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                      <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2 dark:text-gray-100">
                         <PieChart size={20} className="text-blue-500" />
                         Gastos por Categoria
                       </h3>
@@ -288,8 +289,8 @@ function AppContent() {
                               ][index % 8]
                             }}
                           ></div>
-                          <span className="text-gray-600 truncate flex-1">{cat.name}</span>
-                          <span className="font-bold text-gray-800">{Math.round((cat.value / (totalBalance > 0 ? totalBalance : 1)) * 100)}%</span>
+                          <span className="text-gray-600 truncate flex-1 dark:text-gray-400">{cat.name}</span>
+                          <span className="font-bold text-gray-800 dark:text-gray-200">{Math.round((cat.value / (totalBalance > 0 ? totalBalance : 1)) * 100)}%</span>
                         </div>
                       ))}
                     </div>
@@ -299,7 +300,7 @@ function AppContent() {
                 {/* Right Column: Recent Activity */}
                 <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
                   <div className="flex justify-between items-center px-1">
-                    <h3 className="font-bold text-lg text-gray-700">Atividade Recente</h3>
+                    <h3 className="font-bold text-lg text-gray-700 dark:text-gray-200">Atividade Recente</h3>
                     <button
                       onClick={() => setActiveTab('history')}
                       className="text-sm text-blue-600 font-medium hover:underline"
@@ -337,9 +338,9 @@ function AppContent() {
           )}
 
           {activeTab === 'history' && (
-            <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[500px]">
+            <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[500px] dark:bg-gray-900 dark:border-gray-800">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-lg">Histórico Completo</h3>
+                <h3 className="font-bold text-lg dark:text-gray-100">Histórico Completo</h3>
               </div>
               <TransactionList onTransactionClick={handleOpenModal} />
             </section>
@@ -366,20 +367,20 @@ function AppContent() {
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around p-4 pb-6 z-50">
-        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600' : 'text-gray-400'}`}>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around p-4 pb-6 z-50 dark:bg-gray-900 dark:border-gray-800">
+        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-1 ${activeTab === 'dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
           <Home size={24} />
           <span className="text-xs font-medium">Início</span>
         </button>
-        <button onClick={() => setActiveTab('reports')} className={`flex flex-col items-center gap-1 ${activeTab === 'reports' ? 'text-blue-600' : 'text-gray-400'}`}>
+        <button onClick={() => setActiveTab('reports')} className={`flex flex-col items-center gap-1 ${activeTab === 'reports' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
           <PieChart size={24} />
           <span className="text-xs font-medium">Relatórios</span>
         </button>
-        <button onClick={() => setActiveTab('exchange')} className={`flex flex-col items-center gap-1 ${activeTab === 'exchange' ? 'text-blue-600' : 'text-gray-400'}`}>
+        <button onClick={() => setActiveTab('exchange')} className={`flex flex-col items-center gap-1 ${activeTab === 'exchange' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
           <DollarSign size={24} />
           <span className="text-xs font-medium">Câmbio</span>
         </button>
-        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600' : 'text-gray-400'}`}>
+        <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>
           <Wallet size={24} />
           <span className="text-xs font-medium">Histórico</span>
         </button>
@@ -420,7 +421,9 @@ export default function App() {
   return (
     <ToastProvider>
       <AuthProvider>
-        <AuthenticatedApp />
+        <ThemeProvider>
+          <AuthenticatedApp />
+        </ThemeProvider>
       </AuthProvider>
     </ToastProvider>
   );

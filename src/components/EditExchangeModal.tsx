@@ -48,17 +48,17 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-end md:items-center justify-center p-4">
-            <div className="bg-white w-full max-w-lg rounded-3xl p-6 relative animate-in slide-in-from-bottom-10 fade-in duration-200">
+            <div className="bg-white w-full max-w-lg rounded-3xl p-6 relative animate-in slide-in-from-bottom-10 fade-in duration-200 dark:bg-gray-900">
 
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                 >
                     <X size={24} />
                 </button>
 
-                <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <DollarSign className="text-green-600" />
+                <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 dark:text-gray-100">
+                    <DollarSign className="text-green-600 dark:text-green-400" />
                     Editar Câmbio
                 </h2>
 
@@ -66,67 +66,67 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
 
                     {/* Date */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Data</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Data</label>
                         <input
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             required
                         />
                     </div>
 
                     {/* Origin Amount (BRL) */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Valor Pago ({originCurrency})</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Valor Pago ({originCurrency})</label>
                         <input
                             type="number"
                             step="0.01"
                             value={originAmount}
                             onChange={(e) => setOriginAmount(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg"
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             required
                         />
                     </div>
 
                     <div className="flex justify-center -my-3 relative z-10">
-                        <div className="bg-gray-100 p-2 rounded-full border border-white shadow-sm">
-                            <ArrowDown size={20} className="text-gray-400" />
+                        <div className="bg-gray-100 p-2 rounded-full border border-white shadow-sm dark:bg-gray-700 dark:border-gray-600">
+                            <ArrowDown size={20} className="text-gray-400 dark:text-gray-300" />
                         </div>
                     </div>
 
                     {/* Target Amount (USD) */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Valor Recebido (USD)</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Valor Recebido (USD)</label>
                         <input
                             type="number"
                             step="0.01"
                             value={targetAmount}
                             onChange={(e) => setTargetAmount(e.target.value)}
-                            className="w-full px-4 py-3 bg-green-50 rounded-xl border-green-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg text-green-700"
+                            className="w-full px-4 py-3 bg-green-50 rounded-xl border-green-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg text-green-700 dark:bg-green-900/20 dark:border-green-900/30 dark:text-green-400"
                             required
                         />
                     </div>
 
-                    <div className="text-center text-sm text-gray-500">
-                        Cotação: <span className="font-bold text-gray-800">R$ {rate}</span>
+                    <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                        Cotação: <span className="font-bold text-gray-800 dark:text-gray-200">R$ {rate}</span>
                     </div>
 
                     {/* Broker/Location */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-1">Corretora / Local</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-1 dark:text-gray-400">Corretora / Local</label>
                         <input
                             type="text"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium"
+                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             placeholder="Ex: Wise, Western Union"
                         />
                     </div>
 
                     {/* Target Wallet */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-2">Destino do Dólar</label>
+                        <label className="block text-sm font-medium text-gray-500 mb-2 dark:text-gray-400">Destino do Dólar</label>
                         <div className="grid grid-cols-3 gap-2">
                             {wallets.map(w => (
                                 <button
@@ -136,8 +136,8 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
                                     className={clsx(
                                         "py-2 px-1 rounded-lg border text-xs font-bold transition-all",
                                         targetWallet === w.id
-                                            ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500"
-                                            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                                            ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400"
+                                            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                                     )}
                                 >
                                     {w.name}
@@ -149,8 +149,8 @@ export default function EditExchangeModal({ exchange, onClose }: EditExchangeMod
                                 className={clsx(
                                     "py-2 px-1 rounded-lg border text-xs font-bold transition-all",
                                     targetWallet === 'both'
-                                        ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500"
-                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                                        ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500 dark:bg-green-900/20 dark:border-green-500 dark:text-green-400"
+                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700"
                                 )}
                             >
                                 Dividir Todos
