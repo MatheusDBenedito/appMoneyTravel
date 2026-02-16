@@ -7,7 +7,7 @@ import ConfirmModal from './ConfirmModal';
 import EditExchangeModal from './EditExchangeModal';
 
 export default function ExchangeList() {
-    const { exchanges, removeExchange } = useExpenses();
+    const { exchanges, removeExchange, wallets } = useExpenses();
     const { showToast } = useToast();
 
     const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -79,7 +79,11 @@ export default function ExchangeList() {
                             </div>
 
                             <div className="text-right">
-                                <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Recebido ({exchange.targetWallet === 'both' ? 'Todos' : exchange.targetWallet})</p>
+                                <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">
+                                    Recebido ({exchange.targetWallet === 'both'
+                                        ? 'Todos'
+                                        : wallets.find(w => w.id === exchange.targetWallet)?.name || 'Desconhecido'})
+                                </p>
                                 <p className="font-bold text-green-600 text-lg">
                                     $ {exchange.targetAmount.toFixed(2)}
                                 </p>

@@ -60,7 +60,7 @@ export default function PaymentMethodManager() {
                     const isEditing = editingMethod === method;
 
                     return (
-                        <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 overflow-x-auto">
+                        <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                             {isEditing ? (
                                 <div className="flex items-center gap-2 flex-1 mr-2">
                                     <input

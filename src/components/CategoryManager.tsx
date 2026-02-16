@@ -180,12 +180,12 @@ export default function CategoryManager() {
             {/* Add Form */}
             <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
                 <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova Categoria</label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <div className="relative">
                         <button
                             type="button"
                             onClick={() => setShowIconPicker(!showIconPicker)}
-                            className="px-3 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center gap-2"
+                            className="w-full sm:w-auto px-3 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center gap-2"
                         >
                             {React.createElement(getIcon(newCategoryIcon), { size: 20, className: "text-blue-600" })}
                             <ChevronDown size={14} className="text-gray-400" />
@@ -215,7 +215,7 @@ export default function CategoryManager() {
                         type="text"
                         value={newCategory}
                         onChange={(e) => setNewCategory(e.target.value)}
-                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 min-w-0"
                         placeholder="Nome (ex: Pets, Uber)"
                         required
                     />

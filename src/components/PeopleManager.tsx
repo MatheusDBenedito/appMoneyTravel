@@ -134,8 +134,8 @@ export default function PeopleManager() {
                     const isEditing = editingId === wallet.id;
 
                     return (
-                        <div key={wallet.id} className="flex flex-col gap-1 overflow-x-auto">
-                            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 min-w-[300px]">
+                        <div key={wallet.id} className="flex flex-col gap-1 w-full">
+                            <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 w-full">
 
                                 {isEditing ? (
                                     <div className="flex items-center gap-2 flex-1 mr-2 bg-white p-2 rounded-lg border border-purple-200">
@@ -188,10 +188,10 @@ export default function PeopleManager() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col">
-                                        <div className="flex items-center gap-3">
+                                    <div className="flex flex-col flex-1 min-w-0 mr-2">
+                                        <div className="flex items-center gap-3 mb-1">
                                             {/* Avatar / Photo */}
-                                            <div className="relative group">
+                                            <div className="relative group flex-shrink-0">
                                                 <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border border-gray-300">
                                                     {wallet.avatar_url ? (
                                                         <img src={wallet.avatar_url} alt={wallet.name} className="w-full h-full object-cover" />
@@ -216,18 +216,22 @@ export default function PeopleManager() {
                                                 </label>
                                             </div>
 
-                                            <span className="font-bold text-gray-800">{wallet.name}</span>
-                                            <button
-                                                onClick={() => startEditing(wallet.id, wallet.name, wallet.includedInDivision)}
-                                                className="text-gray-300 hover:text-purple-600 transition-colors"
-                                            >
-                                                <Pencil size={14} />
-                                            </button>
-                                            {!wallet.includedInDivision && (
-                                                <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200" title="Não participa da divisão de contas compartilhadas">
-                                                    Não Divide
-                                                </span>
-                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-bold text-gray-800 truncate block">{wallet.name}</span>
+                                                    <button
+                                                        onClick={() => startEditing(wallet.id, wallet.name, wallet.includedInDivision)}
+                                                        className="text-gray-300 hover:text-purple-600 transition-colors flex-shrink-0"
+                                                    >
+                                                        <Pencil size={14} />
+                                                    </button>
+                                                </div>
+                                                {!wallet.includedInDivision && (
+                                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 inline-block truncate max-w-full" title="Não participa da divisão de contas compartilhadas">
+                                                        Não Divide
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <span className={clsx("text-xs font-mono", balance >= 0 ? "text-green-600" : "text-red-500")}>
                                             ${balance.toFixed(2)}
@@ -265,13 +269,13 @@ export default function PeopleManager() {
             {/* Add Form */}
             <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
                 <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova Pessoa</label>
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
                     {/* New Avatar Input */}
-                    <label className="w-12 h-12 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors relative overflow-hidden border border-gray-300">
+                    <label className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors relative overflow-hidden border border-gray-300">
                         {file ? (
                             <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
-                            <Camera className="text-gray-400" size={20} />
+                            <Camera className="text-gray-400" size={24} />
                         )}
                         <input
                             type="file"
@@ -281,25 +285,25 @@ export default function PeopleManager() {
                         />
                     </label>
 
-                    <div className="flex-1 flex gap-2">
+                    <div className="flex-1 flex gap-2 w-full">
                         <input
                             type="text"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500"
+                            className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500 min-w-0"
                             placeholder="Nome (ex: Filho)"
                             required
                         />
                         <button
                             type="submit"
-                            className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all"
+                            className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all flex-shrink-0"
                         >
                             <UserPlus size={24} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 mt-3 ml-14">
+                <div className="flex items-center gap-2 mt-3 sm:ml-20">
                     <input
                         type="checkbox"
                         id="includedInDivision"
