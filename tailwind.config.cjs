@@ -1,9 +1,10 @@
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
     ],
-    darkMode: 'selector', // v4 requires 'selector' for class-based toggling
+    darkMode: 'selector', // or 'class'
     theme: {
         extend: {},
     },
