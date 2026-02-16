@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { supabase } from '../lib/supabase';
-import { PieChart, TrendingUp, DollarSign, Users, Filter, Briefcase, CreditCard } from 'lucide-react';
+import { PieChart, TrendingUp, Users, Filter, Briefcase, CreditCard } from 'lucide-react';
 import type { Transaction, Wallet } from '../types';
 
 export default function Reports() {
@@ -85,9 +85,20 @@ export default function Reports() {
     const categoryStats = useMemo(() => {
         const stats: Record<string, number> = {};
         transactions.forEach(t => {
-            stats[t.category] = (stats[t.category] || 0) + t.amount;
+            if (t.type === 'expense') {
+                stats[t.category] = (stats[t.category] || 0) + t.amount;
+            } else if (t.type === 'income') {
+                stats[t.category] = (stats[t.category] || 0) - t.amount;
+            }
         });
+
+        // Filter out categories with 0 or negative total (optional, but usually desired for "Spending" charts)
+        // If the user wants to see "Negative Spending" (Profit), we can keep them. 
+        // For a donut chart, negative values usually break it or are confusing. 
+        // Let's keep them but ensure the chart handles them (or just filter out for now if value <= 0).
+
         return Object.entries(stats)
+            .filter(([, value]) => value > 0) // Only show positive spending
             .sort(([, a], [, b]) => b - a)
             .map(([name, value]) => ({
                 name,
@@ -130,21 +141,7 @@ export default function Reports() {
             }));
     }, [transactions, wallets, totalSpent]);
 
-    // 4. Payer Breakdown (Cash Flow Out)
-    const payerStats = useMemo(() => {
-        const stats: Record<string, number> = {};
-        transactions.forEach(t => {
-            stats[t.payer] = (stats[t.payer] || 0) + t.amount;
-        });
-        return Object.entries(stats)
-            .sort(([, a], [, b]) => b - a)
-            .map(([id, value]) => ({
-                id,
-                name: wallets.find(w => w.id === id)?.name || 'Desconhecido',
-                value,
-                percentage: totalSpent > 0 ? (value / totalSpent) * 100 : 0
-            }));
-    }, [transactions, wallets, totalSpent]);
+
 
     // 5. Payment Method Breakdown
     const paymentMethodStats = useMemo(() => {
@@ -307,28 +304,7 @@ export default function Reports() {
                             </div>
                         </div>
 
-                        {/* 3. Payer Chart */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:col-span-2">
-                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <DollarSign size={18} className="text-orange-500" />
-                                Quem Pagou? (Fluxo de Caixa)
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                {payerStats.map((person) => (
-                                    <div key={person.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                                            {person.percentage.toFixed(0)}%
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-gray-500">Pagou</p>
-                                            <p className="font-bold text-gray-900">{person.name}</p>
-                                            <p className="text-sm font-mono text-orange-600">${person.value.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                                {payerStats.length === 0 && <p className="text-gray-400 text-center py-4 col-span-3">Nenhum dado.</p>}
-                            </div>
-                        </div>
+
 
                     </div>
                 </>

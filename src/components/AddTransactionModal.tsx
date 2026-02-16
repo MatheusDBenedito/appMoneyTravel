@@ -23,6 +23,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
     const [payer, setPayer] = useState<WalletType>(wallets[0]?.id || '');
     const [paymentMethod, setPaymentMethod] = useState(paymentMethods[0] || '');
     const [isShared, setIsShared] = useState(false);
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Confirm Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -42,6 +43,9 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             setPayer(initialData.payer);
             setIsShared(initialData.isShared);
             if (initialData.paymentMethod) setPaymentMethod(initialData.paymentMethod);
+            if (initialData.date) {
+                setDate(new Date(initialData.date).toISOString().split('T')[0]);
+            }
         }
     }, [initialData]);
 
@@ -70,6 +74,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
             setTax('');
             setDescription('');
             setCategory(categories[0]?.name || '');
+            setDate(new Date().toISOString().split('T')[0]);
             // setPayer and setPaymentMethod can stay as defaults or current state
         }
     }, [isOpen, initialData, categories]);
@@ -91,7 +96,7 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 isShared,
                 paymentMethod,
                 type: 'expense' as const,
-                date: initialData ? initialData.date : new Date(),
+                date: new Date(date),
             };
 
             if (initialData) {
@@ -268,24 +273,26 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                         {/* Payer & Shared Toggle */}
                         <div className="p-4 bg-gray-50 rounded-xl space-y-4">
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium text-gray-600">Pago por</span>
-                                <div className="flex bg-white rounded-lg p-1 border shadow-sm">
-                                    {wallets.map(w => (
-                                        <button
-                                            key={w.id}
-                                            type="button"
-                                            onClick={() => setPayer(w.id)}
-                                            className={clsx(
-                                                "px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
-                                                payer === w.id ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
-                                            )}
-                                        >
-                                            {w.name}
-                                        </button>
-                                    ))}
+                            {!isShared && (
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-sm font-medium text-gray-600">Pago por</span>
+                                    <div className="flex bg-white rounded-lg p-1 border shadow-sm">
+                                        {wallets.map(w => (
+                                            <button
+                                                key={w.id}
+                                                type="button"
+                                                onClick={() => setPayer(w.id)}
+                                                className={clsx(
+                                                    "px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
+                                                    payer === w.id ? "bg-gray-900 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+                                                )}
+                                            >
+                                                {w.name}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                                 <div className="flex items-center gap-2">

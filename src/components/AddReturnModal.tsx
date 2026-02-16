@@ -21,6 +21,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
     const [receiver, setReceiver] = useState<WalletType>(wallets[0]?.id || '');
     const [category, setCategory] = useState('');
     const [isShared, setIsShared] = useState(false);
+    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
     // Confirm Modal State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -33,6 +34,9 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             setReceiver(initialData.payer); // In returns, payer field stores the receiver
             setIsShared(initialData.isShared);
             setCategory(initialData.category);
+            if (initialData.date) {
+                setDate(new Date(initialData.date).toISOString().split('T')[0]);
+            }
         } else {
             // Default to first category available
             if (categories.length > 0) {
@@ -58,6 +62,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
             // Try to find 'General' or 'Outros', otherwise first one
             const defaultCat = categories.find(c => c.name === 'Geral' || c.name === 'General' || c.name === 'Outros') || categories[0];
             setCategory(defaultCat?.name || '');
+            setDate(new Date().toISOString().split('T')[0]);
         }
     }, [isOpen, initialData, categories]);
 
@@ -73,7 +78,7 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                 isShared,
                 paymentMethod: 'Cash', // Default
                 type: 'income' as const,
-                date: initialData ? initialData.date : new Date(),
+                date: new Date(date),
             };
 
             if (initialData) {
@@ -186,24 +191,26 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                         {/* Receiver & Shared Toggle */}
                         <div className="p-4 bg-gray-50 rounded-xl space-y-4">
 
-                            <div className="flex flex-col gap-2">
-                                <span className="text-sm font-medium text-gray-600">Recebido por</span>
-                                <div className="flex bg-white rounded-lg p-1 border shadow-sm overflow-x-auto no-scrollbar">
-                                    {wallets.map(w => (
-                                        <button
-                                            key={w.id}
-                                            type="button"
-                                            onClick={() => setReceiver(w.id)}
-                                            className={clsx(
-                                                "flex-1 px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
-                                                receiver === w.id ? "bg-green-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
-                                            )}
-                                        >
-                                            {w.name}
-                                        </button>
-                                    ))}
+                            {!isShared && (
+                                <div className="flex flex-col gap-2 mb-4">
+                                    <span className="text-sm font-medium text-gray-600">Recebido por</span>
+                                    <div className="flex bg-white rounded-lg p-1 border shadow-sm overflow-x-auto no-scrollbar">
+                                        {wallets.map(w => (
+                                            <button
+                                                key={w.id}
+                                                type="button"
+                                                onClick={() => setReceiver(w.id)}
+                                                className={clsx(
+                                                    "flex-1 px-4 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap",
+                                                    receiver === w.id ? "bg-green-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-900"
+                                                )}
+                                            >
+                                                {w.name}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="flex items-center justify-between pt-2 border-t border-gray-200">
                                 <div className="flex items-center gap-2">

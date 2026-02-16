@@ -50,10 +50,17 @@ function AppContent() {
     transactions.forEach(t => {
       if (t.type === 'expense') {
         stats[t.category] = (stats[t.category] || 0) + t.amount;
+      } else if (t.type === 'income') {
+        stats[t.category] = (stats[t.category] || 0) - t.amount;
       }
     });
-    const total = Object.values(stats).reduce((a, b) => a + b, 0);
-    return Object.entries(stats)
+
+    // Filter out <= 0 for the pie chart
+    const filteredStats = Object.entries(stats).filter(([, value]) => value > 0);
+
+    const total = filteredStats.reduce((a, [, b]) => a + b, 0);
+
+    return filteredStats
       .sort(([, a], [, b]) => b - a)
       .map(([name, value]) => ({
         name,
