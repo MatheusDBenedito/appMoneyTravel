@@ -258,7 +258,7 @@ export default function Reports() {
                             </h3>
                             <div className="flex items-end gap-2 overflow-x-auto pb-2 no-scrollbar h-48">
                                 {dailyStats.map((day) => (
-                                    <div key={day.dateIso} className="flex flex-col items-center gap-2 min-w-[40px] group relative">
+                                    <div key={day.dateIso} className="h-full flex flex-col justify-end items-center gap-2 min-w-[40px] group relative">
 
                                         {/* Tooltip */}
                                         <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-800 text-white text-xs rounded px-2 py-1 pointer-events-none whitespace-nowrap z-10">
@@ -266,19 +266,11 @@ export default function Reports() {
                                         </div>
 
                                         <div
-                                            className="w-8 bg-indigo-100 rounded-t-lg relative group-hover:bg-indigo-200 transition-colors"
-                                            style={{ height: `${maxDailySpend > 0 ? (day.value / maxDailySpend) * 100 : 0}%` }}
-                                        >
-                                            <div className="absolute bottom-0 w-full bg-indigo-500 rounded-t-lg transition-all duration-500" style={{ height: '0%' }}></div>
-                                            {/* Simple bar for now */}
-                                        </div>
-                                        {/* Re-implementing bar with just one div for simplicity */}
-                                        <div
-                                            className="w-8 bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600"
+                                            className="w-8 bg-indigo-500 rounded-t-lg transition-all duration-500 hover:bg-indigo-600 relative"
                                             style={{ height: `${maxDailySpend > 0 ? (day.value / maxDailySpend) * 100 : 0}%`, minHeight: '4px' }}
                                         ></div>
 
-                                        <span className="text-xs text-gray-500 font-medium rotate-0">{day.name}</span>
+                                        <span className="text-xs text-gray-500 font-medium">{day.name}</span>
                                     </div>
                                 ))}
                                 {dailyStats.length === 0 && <p className="text-gray-400 text-center w-full py-12">Nenhum dado.</p>}
