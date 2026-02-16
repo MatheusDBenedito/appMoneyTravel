@@ -45,7 +45,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
 
 
     return (
-        <aside className={`bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col h-screen sticky top-0 ${className}`}>
+        <aside className={`bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 ${className}`}>
             <div className="p-6 border-b border-gray-100 space-y-4">
                 <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('dashboard')}>
                     <span className="bg-blue-600 text-white p-1 rounded-lg">
