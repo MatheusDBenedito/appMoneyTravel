@@ -1,7 +1,7 @@
 import { useExpenses } from '../context/ExpenseContext';
 // import { useToast } from '../hooks/useToast';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+
 import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
