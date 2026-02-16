@@ -3,6 +3,7 @@ import { ExpenseProvider, useExpenses } from './context/ExpenseContext';
 import { Plus, ArrowRightLeft, Settings, PieChart, Wallet, Home, DollarSign } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CreateTripModal from './components/CreateTripModal';
+import DonutChart from './components/DonutChart';
 // Components
 import TransactionList from './components/TransactionList';
 import AddTransactionModal from './components/AddTransactionModal';
@@ -40,6 +41,26 @@ function AppContent() {
   }, [activeTab]);
 
   const totalBalance = wallets.reduce((acc, w) => acc + getWalletBalance(w.id), 0);
+
+  const { transactions } = useExpenses(); // Ensure transactions are available
+
+  // Calculate Category Stats for Chart
+  const categoryStats = activeTab === 'dashboard' ? (() => {
+    const stats: Record<string, number> = {};
+    transactions.forEach(t => {
+      if (t.type === 'expense') {
+        stats[t.category] = (stats[t.category] || 0) + t.amount;
+      }
+    });
+    const total = Object.values(stats).reduce((a, b) => a + b, 0);
+    return Object.entries(stats)
+      .sort(([, a], [, b]) => b - a)
+      .map(([name, value]) => ({
+        name,
+        value,
+        percentage: total > 0 ? (value / total) * 100 : 0
+      }));
+  })() : [];
 
   const handleTripChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
@@ -226,8 +247,44 @@ function AppContent() {
                         Gastos por Categoria
                       </h3>
                     </div>
-                    <div className="h-64 flex items-center justify-center text-gray-400 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                      <span className="text-sm">Gráfico de Rosca aqui</span>
+                    <div className="flex justify-center">
+                      <DonutChart
+                        data={categoryStats.map((cat, index) => ({
+                          name: cat.name,
+                          value: cat.value,
+                          color: [
+                            '#3B82F6', // blue-500
+                            '#10B981', // emerald-500
+                            '#F59E0B', // amber-500
+                            '#EF4444', // red-500
+                            '#8B5CF6', // violet-500
+                            '#EC4899', // pink-500
+                            '#6366F1', // indigo-500
+                            '#14B8A6'  // teal-500
+                          ][index % 8]
+                        }))}
+                        size={220}
+                        strokeWidth={25}
+                      />
+                    </div>
+
+                    {/* Legend */}
+                    <div className="grid grid-cols-2 gap-2 mt-6">
+                      {categoryStats.slice(0, 4).map((cat, index) => (
+                        <div key={cat.name} className="flex items-center gap-2 text-sm">
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{
+                              backgroundColor: [
+                                '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+                                '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                              ][index % 8]
+                            }}
+                          ></div>
+                          <span className="text-gray-600 truncate flex-1">{cat.name}</span>
+                          <span className="font-bold text-gray-800">{Math.round((cat.value / (totalBalance > 0 ? totalBalance : 1)) * 100)}%</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

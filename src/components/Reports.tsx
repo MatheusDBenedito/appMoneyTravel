@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { supabase } from '../lib/supabase';
-import { PieChart, TrendingUp, DollarSign, Users, Filter, Briefcase } from 'lucide-react';
+import { PieChart, TrendingUp, DollarSign, Users, Filter, Briefcase, CreditCard } from 'lucide-react';
 import type { Transaction, Wallet } from '../types';
 
 export default function Reports() {
@@ -146,6 +146,24 @@ export default function Reports() {
             }));
     }, [transactions, wallets, totalSpent]);
 
+    // 5. Payment Method Breakdown
+    const paymentMethodStats = useMemo(() => {
+        const stats: Record<string, number> = {};
+        transactions.forEach(t => {
+            if (t.type === 'expense') { // Only count expenses, not transfers/returns
+                const method = t.paymentMethod || 'Indefinido';
+                stats[method] = (stats[method] || 0) + t.amount;
+            }
+        });
+        return Object.entries(stats)
+            .sort(([, a], [, b]) => b - a)
+            .map(([name, value]) => ({
+                name,
+                value,
+                percentage: totalSpent > 0 ? (value / totalSpent) * 100 : 0
+            }));
+    }, [transactions, totalSpent]);
+
 
     return (
         <div className="p-4 md:p-8 space-y-8 pb-24 md:pb-8">
@@ -233,7 +251,32 @@ export default function Reports() {
                             </div>
                         </div>
 
-                        {/* 2. Person Consumption Chart */}
+                        {/* 2. Payment Method Chart */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <CreditCard size={18} className="text-purple-500" />
+                                Por Forma de Pagamento
+                            </h3>
+                            <div className="space-y-4">
+                                {paymentMethodStats.map((method, index) => (
+                                    <div key={method.name} className="relative">
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700">{method.name}</span>
+                                            <span className="text-gray-500">${method.value.toFixed(2)} ({method.percentage.toFixed(1)}%)</span>
+                                        </div>
+                                        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${index % 2 === 0 ? 'bg-purple-500' : 'bg-pink-500'}`}
+                                                style={{ width: `${method.percentage}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {paymentMethodStats.length === 0 && <p className="text-gray-400 text-center py-4">Nenhum dado.</p>}
+                            </div>
+                        </div>
+
+                        {/* 3. Person Consumption Chart */}
                         <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                             <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                                 <Users size={18} className="text-green-500" />

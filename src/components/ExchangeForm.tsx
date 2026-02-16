@@ -7,7 +7,7 @@ import type { WalletType } from '../types';
 import ExchangeList from './ExchangeList';
 
 export default function ExchangeForm() {
-    const { addExchange, wallets } = useExpenses();
+    const { addExchange, wallets, paymentMethods } = useExpenses();
     const { showToast } = useToast();
 
     // Custom Input State (Strings for formatting)
@@ -27,7 +27,7 @@ export default function ExchangeForm() {
 
     const [originCurrency] = useState('BRL');
     const [targetWallet, setTargetWallet] = useState<WalletType | 'both'>('both');
-    const [location, setLocation] = useState('');
+    const [location, setLocation] = useState(paymentMethods[0] || '');
     const [marketRate, setMarketRate] = useState<number | null>(null);
     const [isLoadingRate, setIsLoadingRate] = useState(false);
 
@@ -49,6 +49,13 @@ export default function ExchangeForm() {
     useEffect(() => {
         fetchRate();
     }, []);
+
+    // Auto-select first payment method if location is empty
+    useEffect(() => {
+        if (!location && paymentMethods.length > 0) {
+            setLocation(paymentMethods[0]);
+        }
+    }, [paymentMethods, location]);
 
     // Format utility
     const formatCurrency = (value: string) => {
@@ -182,16 +189,29 @@ export default function ExchangeForm() {
                 </div>
 
 
-                {/* Broker/Location */}
+                {/* Broker/Location (Now Payment Method) */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-500 mb-1">Corretora / Local</label>
-                    <input
-                        type="text"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-green-500 focus:border-green-500 font-medium"
-                        placeholder="Ex: Wise, Western Union"
-                    />
+                    <label className="block text-sm font-medium text-gray-500 mb-1">Corretora / Local (Forma de Pagamento)</label>
+                    <div className="flex flex-wrap gap-2 bg-gray-50 p-1 rounded-xl">
+                        {paymentMethods.map(method => (
+                            <button
+                                key={method}
+                                type="button"
+                                onClick={() => setLocation(method)}
+                                className={clsx(
+                                    "flex-1 min-w-[80px] py-2 rounded-lg text-xs font-bold transition-all",
+                                    location === method
+                                        ? "bg-white text-green-600 shadow-sm ring-1 ring-green-100"
+                                        : "text-gray-400 hover:text-gray-600"
+                                )}
+                            >
+                                {method}
+                            </button>
+                        ))}
+                        {paymentMethods.length === 0 && (
+                            <span className="text-xs text-gray-400 p-2">Nenhuma forma de pagamento cadastrada.</span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Target Wallet */}

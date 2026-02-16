@@ -63,6 +63,17 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
         }
     }, [category, autoSharedCategories, initialData]);
 
+    // Reset form when opening as new
+    useEffect(() => {
+        if (isOpen && !initialData) {
+            setAmount('');
+            setTax('');
+            setDescription('');
+            setCategory(categories[0]?.name || '');
+            // setPayer and setPaymentMethod can stay as defaults or current state
+        }
+    }, [isOpen, initialData, categories]);
+
     const handleSubmit = async () => {
         if (!amount || !description) return;
 
@@ -91,6 +102,14 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 const { error } = await addTransaction(transactionData);
                 if (error) throw error;
                 showToast('Despesa adicionada com sucesso!', 'success');
+
+                // Reset form only on new transaction success
+                setAmount('');
+                setTax('');
+                setDescription('');
+                setCategory(''); // Should rely on default or keep empty? Resetting triggers re-eval.
+                // Keep payer/method as is or reset? Usually keep last used or reset? 
+                // User said "limpar dados", implies blanking out amount/desc.
             }
 
             onClose();

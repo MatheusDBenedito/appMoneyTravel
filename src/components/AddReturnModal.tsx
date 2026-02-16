@@ -50,6 +50,17 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
         }
     }, [wallets, receiver, initialData]);
 
+    // Reset form when opening as new
+    useEffect(() => {
+        if (isOpen && !initialData) {
+            setAmount('');
+            setDescription('');
+            // Try to find 'General' or 'Outros', otherwise first one
+            const defaultCat = categories.find(c => c.name === 'Geral' || c.name === 'General' || c.name === 'Outros') || categories[0];
+            setCategory(defaultCat?.name || '');
+        }
+    }, [isOpen, initialData, categories]);
+
     const handleSubmit = async () => {
         if (!amount || !description || !category) return;
 
@@ -73,6 +84,10 @@ const AddReturnModal: React.FC<AddReturnModalProps> = ({ isOpen, onClose, initia
                 const { error } = await addTransaction(transactionData);
                 if (error) throw error;
                 showToast('Devolução registrada com sucesso!', 'success');
+
+                // Reset form
+                setAmount('');
+                setDescription('');
             }
 
             onClose();
