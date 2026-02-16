@@ -20,6 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const root = window.document.documentElement;
+        console.log('ThemeContext useEffect. Applying theme:', theme);
 
         // Remove both to ensure clean state
         root.classList.remove('light', 'dark');
@@ -36,7 +37,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }, [theme]);
 
     const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+        console.log('Toggling theme. Current:', theme);
+        setTheme(prev => {
+            const newTheme = prev === 'light' ? 'dark' : 'light';
+            console.log('New theme:', newTheme);
+            return newTheme;
+        });
     };
 
     return (
