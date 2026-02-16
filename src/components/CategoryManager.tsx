@@ -63,8 +63,8 @@ export default function CategoryManager() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 dark:text-gray-100">
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <Tag className="text-blue-500" />
                 Gerenciar Categorias
             </h2>
@@ -77,7 +77,8 @@ export default function CategoryManager() {
                     const Icon = getIcon(category.icon);
 
                     return (
-                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+
+                        <div key={category.name} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
 
                             {isEditing ? (
                                 <div className="flex flex-col gap-2 flex-1 mr-2">
@@ -86,14 +87,14 @@ export default function CategoryManager() {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowEditIconPicker(!showEditIconPicker)}
-                                                className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600"
+                                                className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 flex items-center gap-1"
                                             >
-                                                {React.createElement(getIcon(editIcon), { size: 18, className: "text-blue-600 dark:text-blue-400" })}
-                                                <ChevronDown size={14} className="text-gray-400 dark:text-gray-300" />
+                                                {React.createElement(getIcon(editIcon), { size: 18, className: "text-blue-600" })}
+                                                <ChevronDown size={14} className="text-gray-400" />
                                             </button>
 
                                             {showEditIconPicker && (
-                                                <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
+                                                <div className="absolute top-full left-0 mt-1 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
                                                     {availableIcons.map(iconName => (
                                                         <button
                                                             key={iconName}
@@ -102,7 +103,7 @@ export default function CategoryManager() {
                                                                 setEditIcon(iconName);
                                                                 setShowEditIconPicker(false);
                                                             }}
-                                                            className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center dark:hover:bg-gray-700 ${editIcon === iconName ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+                                                            className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center ${editIcon === iconName ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
                                                             title={iconName}
                                                         >
                                                             {React.createElement(getIcon(iconName), { size: 18 })}
@@ -116,16 +117,16 @@ export default function CategoryManager() {
                                             type="text"
                                             value={editName}
                                             onChange={(e) => setEditName(e.target.value)}
-                                            className="flex-1 px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            className="flex-1 px-2 py-1 bg-white border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             autoFocus
                                             onKeyDown={(e) => e.key === 'Enter' && saveEdit(category.name)}
                                         />
                                     </div>
                                     <div className="flex justify-end gap-2 mt-1">
-                                        <button onClick={() => saveEdit(category.name)} className="text-green-600 hover:bg-green-50 p-1 rounded dark:text-green-400 dark:hover:bg-green-900/20">
+                                        <button onClick={() => saveEdit(category.name)} className="text-green-600 hover:bg-green-50 p-1 rounded">
                                             <Check size={18} />
                                         </button>
-                                        <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded dark:hover:bg-gray-700">
+                                        <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
                                             <X size={18} />
                                         </button>
                                     </div>
@@ -133,10 +134,10 @@ export default function CategoryManager() {
                             ) : (
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-2">
-                                        <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
+                                        <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
                                             <Icon size={16} />
                                         </div>
-                                        <span className="font-bold text-gray-800 dark:text-gray-200">{category.name}</span>
+                                        <span className="font-bold text-gray-800">{category.name}</span>
                                         <button
                                             onClick={() => startEditing(category)}
                                             className="text-gray-300 hover:text-blue-600 transition-colors"
@@ -146,12 +147,12 @@ export default function CategoryManager() {
                                     </div>
                                     <button
                                         onClick={() => toggleAutoShare(category.name)}
-                                        className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors mt-1 dark:text-gray-400 dark:hover:text-blue-400"
+                                        className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-blue-600 transition-colors mt-1"
                                     >
                                         {isAutoShared ? (
                                             <>
-                                                <ToggleRight className="text-blue-600 dark:text-blue-400" size={16} />
-                                                <span className="text-blue-600 dark:text-blue-400">Divide Automático</span>
+                                                <ToggleRight className="text-blue-600" size={16} />
+                                                <span className="text-blue-600">Divide Automático</span>
                                             </>
                                         ) : (
                                             <>
@@ -166,7 +167,7 @@ export default function CategoryManager() {
                             {!isEditing && (
                                 <button
                                     onClick={() => setDeleteCategoryName(category.name)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-900/20"
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Remover Categoria"
                                 >
                                     <Trash2 size={20} />
@@ -178,21 +179,21 @@ export default function CategoryManager() {
             </div>
 
             {/* Add Form */}
-            <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative dark:border-gray-800">
-                <label className="block text-sm font-medium text-gray-500 mb-2 dark:text-gray-400">Adicionar Nova Categoria</label>
+            <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
+                <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova Categoria</label>
                 <div className="flex flex-col sm:flex-row gap-2">
                     <div className="relative">
                         <button
                             type="button"
                             onClick={() => setShowIconPicker(!showIconPicker)}
-                            className="w-full sm:w-auto px-3 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center gap-2 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+                            className="w-full sm:w-auto px-3 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center gap-2"
                         >
-                            {React.createElement(getIcon(newCategoryIcon), { size: 20, className: "text-blue-600 dark:text-blue-400" })}
+                            {React.createElement(getIcon(newCategoryIcon), { size: 20, className: "text-blue-600" })}
                             <ChevronDown size={14} className="text-gray-400" />
                         </button>
 
                         {showIconPicker && (
-                            <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
+                            <div className="absolute bottom-full left-0 mb-2 w-64 p-2 bg-white rounded-xl shadow-xl border border-gray-100 z-50 grid grid-cols-6 gap-1 max-h-48 overflow-y-auto">
                                 {availableIcons.map(iconName => (
                                     <button
                                         key={iconName}
@@ -201,7 +202,7 @@ export default function CategoryManager() {
                                             setNewCategoryIcon(iconName);
                                             setShowIconPicker(false);
                                         }}
-                                        className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center dark:hover:bg-gray-700 ${newCategoryIcon === iconName ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+                                        className={`p-2 rounded-lg hover:bg-gray-100 flex justify-center items-center ${newCategoryIcon === iconName ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
                                         title={iconName}
                                     >
                                         {React.createElement(getIcon(iconName), { size: 18 })}
@@ -215,13 +216,13 @@ export default function CategoryManager() {
                         type="text"
                         value={newCategory}
                         onChange={(e) => setNewCategory(e.target.value)}
-                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 min-w-0 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 min-w-0"
                         placeholder="Nome (ex: Pets, Uber)"
                         required
                     />
                     <button
                         type="submit"
-                        className="px-4 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all dark:shadow-none"
+                        className="px-4 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all"
                     >
                         <Plus size={24} />
                     </button>

@@ -45,8 +45,8 @@ export default function PaymentMethodManager() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 dark:text-gray-100">
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <CreditCard className="text-purple-500" />
                 Formas de Pagamento
             </h2>
@@ -54,33 +54,33 @@ export default function PaymentMethodManager() {
             {/* List */}
             <div className="space-y-3 mb-8">
                 {paymentMethods.length === 0 && (
-                    <p className="text-gray-400 text-center italic py-4 dark:text-gray-500">Nenhuma forma de pagamento cadastrada.</p>
+                    <p className="text-gray-400 text-center italic py-4">Nenhuma forma de pagamento cadastrada.</p>
                 )}
                 {paymentMethods.map(method => {
                     const isEditing = editingMethod === method;
 
                     return (
-                        <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+                        <div key={method} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
                             {isEditing ? (
                                 <div className="flex items-center gap-2 flex-1 mr-2">
                                     <input
                                         type="text"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
-                                        className="w-full px-2 py-1 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        className="w-full px-2 py-1 bg-white border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                                         autoFocus
                                         onKeyDown={(e) => e.key === 'Enter' && saveEdit(method)}
                                     />
-                                    <button onClick={() => saveEdit(method)} className="text-green-600 hover:bg-green-50 p-1 rounded dark:text-green-400 dark:hover:bg-green-900/20">
+                                    <button onClick={() => saveEdit(method)} className="text-green-600 hover:bg-green-50 p-1 rounded">
                                         <Check size={18} />
                                     </button>
-                                    <button onClick={() => setEditingMethod(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded dark:hover:bg-gray-700">
+                                    <button onClick={() => setEditingMethod(null)} className="text-gray-400 hover:bg-gray-50 p-1 rounded">
                                         <X size={18} />
                                     </button>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-800 dark:text-gray-200">{method}</span>
+                                    <span className="font-bold text-gray-800">{method}</span>
                                     <button
                                         onClick={() => startEditing(method)}
                                         className="text-gray-300 hover:text-purple-600 transition-colors"
@@ -93,7 +93,7 @@ export default function PaymentMethodManager() {
                             {!isEditing && (
                                 <button
                                     onClick={() => setDeleteMethodName(method)}
-                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-900/20"
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Remover Forma de Pagamento"
                                 >
                                     <Trash2 size={20} />
@@ -105,20 +105,20 @@ export default function PaymentMethodManager() {
             </div>
 
             {/* Add Form */}
-            <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative dark:border-gray-800">
-                <label className="block text-sm font-medium text-gray-500 mb-2 dark:text-gray-400">Adicionar Nova</label>
+            <form onSubmit={handleAdd} className="mt-6 pt-6 border-t border-gray-100 relative">
+                <label className="block text-sm font-medium text-gray-500 mb-2">Adicionar Nova</label>
                 <div className="flex gap-2">
                     <input
                         type="text"
                         value={newMethod}
                         onChange={(e) => setNewMethod(e.target.value)}
-                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                        className="flex-1 px-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-purple-500 focus:border-purple-500 "
                         placeholder="Nome (ex: Nubank, Voucher)"
                         required
                     />
                     <button
                         type="submit"
-                        className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all dark:shadow-none"
+                        className="px-4 py-3 bg-purple-600 text-white rounded-xl shadow-lg shadow-purple-200 hover:bg-purple-700 active:scale-95 transition-all"
                     >
                         <Plus size={24} />
                     </button>

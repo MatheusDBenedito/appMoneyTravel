@@ -27,10 +27,10 @@ export default function ExchangeList() {
 
     return (
         <div className="mt-8">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 px-2 dark:text-gray-100">Histórico de Câmbio</h3>
+            <h3 className="text-lg font-bold text-gray-800 mb-4 px-2">Histórico de Câmbio</h3>
             <div className="space-y-4">
                 {exchanges.map(exchange => (
-                    <div key={exchange.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3 dark:bg-gray-900 dark:border-gray-800">
+                    <div key={exchange.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
 
                         {/* Header: Date & Actions */}
                         <div className="flex justify-between items-start">
@@ -67,13 +67,13 @@ export default function ExchangeList() {
                         <div className="flex justify-between items-center px-1">
                             <div>
                                 <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Pago</p>
-                                <p className="font-bold text-gray-800 text-lg dark:text-gray-100">
+                                <p className="font-bold text-gray-800 text-lg">
                                     R$ {exchange.originAmount.toFixed(2)}
                                 </p>
                             </div>
 
                             <div className="text-center">
-                                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap dark:bg-gray-800 dark:text-gray-300">
+                                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
                                     Taxa R$ {exchange.rate.toFixed(2)}
                                 </span>
                             </div>

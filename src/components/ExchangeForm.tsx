@@ -113,8 +113,8 @@ export default function ExchangeForm() {
     };
 
     return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2 dark:text-gray-100">
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <DollarSign className="text-green-600" />
                 Novo Câmbio
             </h2>
@@ -140,7 +140,7 @@ export default function ExchangeForm() {
                                     handleInputChange(e, setOriginValue);
                                 }
                             }}
-                            className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                            className="w-full pl-12 pr-4 py-3 bg-gray-50 rounded-xl border-gray-200 focus:ring-green-500 focus:border-green-500 font-bold text-lg"
                             placeholder="0,00"
                             required
                         />
@@ -148,7 +148,7 @@ export default function ExchangeForm() {
                 </div>
 
                 <div className="flex justify-center -my-3 relative z-10">
-                    <div className="bg-gray-100 p-2 rounded-full border border-white shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                    <div className="bg-gray-100 p-2 rounded-full border border-white shadow-sm">
                         <ArrowDown size={20} className="text-gray-400" />
                     </div>
                 </div>
@@ -206,7 +206,7 @@ export default function ExchangeForm() {
                 {/* Broker/Location (Now Payment Method) */}
                 <div>
                     <label className="block text-sm font-medium text-gray-500 mb-1">Corretora / Local (Forma de Pagamento)</label>
-                    <div className="flex flex-wrap gap-2 bg-gray-50 p-1 rounded-xl dark:bg-gray-800">
+                    <div className="flex flex-wrap gap-2 bg-gray-50 p-1 rounded-xl">
                         {paymentMethods.map(method => (
                             <button
                                 key={method}
@@ -215,8 +215,8 @@ export default function ExchangeForm() {
                                 className={clsx(
                                     "flex-1 min-w-[80px] py-2 rounded-lg text-xs font-bold transition-all",
                                     location === method
-                                        ? "bg-white text-green-600 shadow-sm ring-1 ring-green-100 dark:bg-gray-700 dark:ring-green-900 dark:text-green-400"
-                                        : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        ? "bg-white text-green-600 shadow-sm ring-1 ring-green-100"
+                                        : "text-gray-400 hover:text-gray-600"
                                 )}
                             >
                                 {method}
@@ -240,8 +240,8 @@ export default function ExchangeForm() {
                                 className={clsx(
                                     "py-3 px-2 rounded-xl border text-sm font-medium transition-all",
                                     targetWallet === w.id
-                                        ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500 dark:bg-green-900/20 dark:text-green-400"
-                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700"
+                                        ? "border-green-500 bg-green-50 text-green-700 ring-1 ring-green-500"
+                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                                 )}
                             >
                                 {w.name}

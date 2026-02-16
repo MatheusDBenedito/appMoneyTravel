@@ -195,11 +195,11 @@ export default function Reports() {
             {/* Header / Trip Selector */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 dark:text-gray-100">
-                        <PieChart className="text-purple-600 dark:text-purple-400" />
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <PieChart className="text-purple-600" />
                         Relatórios
                     </h2>
-                    <p className="text-gray-500 text-sm dark:text-gray-400">Análise completa da viagem</p>
+                    <p className="text-gray-500 text-sm">Análise completa da viagem</p>
                 </div>
 
                 <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm flex items-center gap-2 px-3">
