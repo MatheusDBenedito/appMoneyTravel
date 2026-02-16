@@ -131,7 +131,6 @@ export default function ExchangeForm() {
                             inputMode="numeric"
                             value={formatCurrency(originValue)}
                             onChange={(e) => {
-                                let val = e.target.value;
                                 // Remove non-digit chars for length check purposes (approximate) or just check raw length
                                 // The handleInputChange validation logic is:
                                 // let value = e.target.value; value = value.replace(/\D/g, ''); setter(value);
