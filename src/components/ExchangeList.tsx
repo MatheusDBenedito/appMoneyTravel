@@ -73,7 +73,7 @@ export default function ExchangeList() {
                             </div>
 
                             <div className="text-center">
-                                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                                <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrap">
                                     Taxa R$ {exchange.rate.toFixed(2)}
                                 </span>
                             </div>
