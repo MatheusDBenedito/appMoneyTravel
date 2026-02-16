@@ -142,7 +142,7 @@ function AppContent() {
           <div className="text-center py-4 relative">
             <span className="text-blue-100 text-sm font-medium">Saldo Total</span>
             <h2 className="text-4xl font-bold mt-1">
-              R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              $ {totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h2>
           </div>
         </header>
@@ -206,7 +206,7 @@ function AppContent() {
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
               {/* Wallets Cards (Horizontal Scroll) */}
-              <div className="flex overflow-x-auto gap-4 pb-4 -mx-4 px-4 md:px-0 scrollbar-hide">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
                 {wallets.map(wallet => (
                   <WalletCard
                     key={wallet.id}

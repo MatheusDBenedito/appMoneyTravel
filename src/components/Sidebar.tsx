@@ -1,7 +1,7 @@
 import { useExpenses } from '../context/ExpenseContext';
 // import { useToast } from '../hooks/useToast';
 import { useAuth } from '../context/AuthContext';
-import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut } from 'lucide-react';
+import { Home, DollarSign, Settings, Wallet, PieChart, Map, LogOut, User } from 'lucide-react';
 import { useState } from 'react';
 import CreateTripModal from './CreateTripModal';
 
@@ -37,6 +37,7 @@ export default function Sidebar({ activeTab, setActiveTab, className = '' }: Sid
         { id: 'reports', label: 'Relatórios', icon: PieChart },
         { id: 'exchange', label: 'Câmbio', icon: DollarSign },
         { id: 'history', label: 'Histórico', icon: Wallet },
+        { id: 'profile', label: 'Meu Perfil', icon: User },
         { id: 'settings', label: 'Configurações', icon: Settings },
     ] as const;
 

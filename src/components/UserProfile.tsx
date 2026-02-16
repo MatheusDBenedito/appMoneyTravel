@@ -1,14 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useExpenses } from '../context/ExpenseContext'; // Import useExpenses
 import { supabase } from '../lib/supabase';
 import { useToast } from '../hooks/useToast';
 import { User, Camera, Loader2, Save, LogOut } from 'lucide-react';
 
 export default function UserProfile() {
     const { user, signOut } = useAuth();
+    const { uploadAvatar } = useExpenses(); // Get uploadAvatar
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false); // State for upload loading
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [imageError, setImageError] = useState(false);
@@ -69,6 +72,29 @@ export default function UserProfile() {
         }
     }
 
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) {
+            return;
+        }
+        const file = e.target.files[0];
+        try {
+            setUploading(true);
+            const publicUrl = await uploadAvatar(file);
+            if (publicUrl) {
+                setAvatarUrl(publicUrl);
+                setImageError(false);
+                showToast('Foto carregada! Não esqueça de salvar.', 'success');
+            } else {
+                showToast('Erro ao fazer upload da imagem.', 'error');
+            }
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            showToast('Erro ao fazer upload da imagem.', 'error');
+        } finally {
+            setUploading(false);
+        }
+    };
+
     return (
         <div className="max-w-2xl mx-auto p-4 md:p-8">
             <h2 className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-3">
@@ -93,11 +119,24 @@ export default function UserProfile() {
                                 </div>
                             )}
                         </div>
-                        {/* Placeholder for future avatar upload functionality */}
-                        <div className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                            <Camera size={24} />
-                        </div>
+
+                        {/* Avatar Upload Overlay */}
+                        <label className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer">
+                            {uploading ? (
+                                <Loader2 className="animate-spin" size={24} />
+                            ) : (
+                                <Camera size={24} />
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                                disabled={uploading}
+                            />
+                        </label>
                     </div>
+                    <p className="text-sm text-gray-500 mt-2">Clique na foto para alterar</p>
                 </div>
 
                 <div className="space-y-6">
@@ -122,21 +161,11 @@ export default function UserProfile() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-2">Avatar URL (opcional)</label>
-                        <input
-                            type="url"
-                            value={avatarUrl}
-                            onChange={(e) => setAvatarUrl(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm"
-                            placeholder="https://exemplo.com/foto.jpg"
-                        />
-                    </div>
-
+                    {/* Removed Manual URL Input */}
 
                     <button
                         onClick={updateProfile}
-                        disabled={loading}
+                        disabled={loading || uploading}
                         className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transform transition-all active:scale-95 flex items-center justify-center gap-2 mt-4"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
