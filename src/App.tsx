@@ -94,10 +94,28 @@ function AppContent() {
     }
   };
 
+  useEffect(() => {
+    if (isModalOpen || isReturnModalOpen) {
+      // Push state so back button works
+      window.history.pushState({ modalOpen: true }, '');
+
+      const handlePopState = () => {
+        setIsModalOpen(false);
+        setIsReturnModalOpen(false);
+        setSelectedTransaction(undefined);
+      };
+
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [isModalOpen, isReturnModalOpen]);
+
   const handleCloseModal = () => {
-    setSelectedTransaction(undefined);
-    setIsModalOpen(false);
-    setIsReturnModalOpen(false);
+    // Navigate back to close modal (triggers popstate)
+    window.history.back();
   };
 
   if (isLoading) {
