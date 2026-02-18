@@ -515,10 +515,17 @@ export const ExpenseProvider: React.FC<{ children: ReactNode }> = ({ children })
         // If created_at is missing, assume it always existed (legacy compatibility)
         const walletExistedAt = (w: Wallet, date: string | Date) => {
             if (!w.created_at) return true;
-            // Compare timestamps. 
-            // We use simple comparison: creation time must be BEFORE or EQUAL to transaction time.
-            // Using a small buffer (e.g. same day) might be tricky, but strict timestamp is safest for "history".
-            return new Date(w.created_at) <= new Date(date);
+
+            // Compare DATES only (ignore time) to avoid issues where wallet is created 
+            // slightly "after" the transaction due to clock skew or same-operation timing.
+            const walletDate = new Date(w.created_at);
+            const txDate = new Date(date);
+
+            // Reset hours to 0 to compare just the calendar day
+            walletDate.setHours(0, 0, 0, 0);
+            txDate.setHours(0, 0, 0, 0);
+
+            return walletDate <= txDate;
         };
 
         // Add Exchanges
