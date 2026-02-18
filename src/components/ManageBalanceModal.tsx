@@ -16,7 +16,14 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
 
     const [amount, setAmount] = useState('');
     const [operation, setOperation] = useState<Operation>('add');
-    const [target, setTarget] = useState<Target>('both');
+    const [target, setTarget] = useState<Target>(wallets[0]?.id || '');
+
+    // Ensure target is valid when wallets change
+    React.useEffect(() => {
+        if (!target && wallets.length > 0) {
+            setTarget(wallets[0].id);
+        }
+    }, [wallets, target]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,10 +42,13 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
         };
 
         if (target === 'both') {
-            // Split 50/50
-            const half = val / 2;
-            applyUpdate('me', half);
-            applyUpdate('wife', half);
+            // Split equally among all wallets
+            // Note: 'both' is a legacy term, here we treat it as 'all'
+            const divider = wallets.length;
+            if (divider > 0) {
+                const part = val / divider;
+                wallets.forEach(w => applyUpdate(w.id, part));
+            }
         } else {
             applyUpdate(target, val);
         }
@@ -51,7 +61,7 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
             <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-300">
 
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Manage Balance</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Gerenciar Saldo</h2>
                     <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
                         <X size={20} />
                     </button>
@@ -72,7 +82,7 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
                             )}
                         >
                             <Plus size={16} />
-                            Add Money
+                            Adicionar
                         </button>
                         <button
                             type="button"
@@ -85,14 +95,14 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
                             )}
                         >
                             <Minus size={16} />
-                            Remove
+                            Remover
                         </button>
                     </div>
 
                     {/* Amount Input */}
                     <div>
                         <label className="block text-sm font-medium text-gray-500 mb-1 text-center">
-                            Amount to {operation}
+                            Valor para {operation === 'add' ? 'Adicionar' : 'Remover'}
                         </label>
                         <div className="relative">
                             <span className={clsx(
@@ -125,43 +135,35 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
 
                     {/* Target Selection */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-500 mb-2">Apply to</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setTarget('me')}
-                                className={clsx(
-                                    "py-3 px-2 rounded-xl border text-sm font-medium transition-all",
-                                    target === 'me'
-                                        ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
-                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-                                )}
-                            >
-                                Eu
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setTarget('wife')}
-                                className={clsx(
-                                    "py-3 px-2 rounded-xl border text-sm font-medium transition-all",
-                                    target === 'wife'
-                                        ? "border-pink-500 bg-pink-50 text-pink-700 ring-1 ring-pink-500"
-                                        : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
-                                )}
-                            >
-                                Esposa
-                            </button>
+                        <label className="block text-sm font-medium text-gray-500 mb-2">Aplicar em</label>
+                        <div className="flex flex-wrap gap-2">
+                            {wallets.map(w => (
+                                <button
+                                    key={w.id}
+                                    type="button"
+                                    onClick={() => setTarget(w.id)}
+                                    className={clsx(
+                                        "py-2 px-3 rounded-xl border text-sm font-medium transition-all flex-1 min-w-[30%]",
+                                        target === w.id
+                                            ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
+                                            : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                                    )}
+                                >
+                                    {w.name}
+                                </button>
+                            ))}
+
                             <button
                                 type="button"
                                 onClick={() => setTarget('both')}
                                 className={clsx(
-                                    "py-3 px-2 rounded-xl border text-sm font-medium transition-all",
+                                    "py-2 px-3 rounded-xl border text-sm font-medium transition-all flex-1 min-w-[30%]",
                                     target === 'both'
                                         ? "border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500"
                                         : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                                 )}
                             >
-                                Both (50/50)
+                                Todos (Dividir)
                             </button>
                         </div>
                     </div>
@@ -176,7 +178,7 @@ const ManageBalanceModal: React.FC<ManageBalanceModalProps> = ({ onClose }) => {
                         )}
                     >
                         <Check size={20} />
-                        Confirm {operation === 'add' ? 'Depósito' : 'Retirada'}
+                        Confirmar {operation === 'add' ? 'Depósito' : 'Retirada'}
                     </button>
 
                 </form>

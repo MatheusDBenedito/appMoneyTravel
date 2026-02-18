@@ -82,8 +82,30 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
         }
     }, [category, autoSharedCategories, initialData]);
 
+    // Ensure payer is set if wallets are available and payer is empty
+    useEffect(() => {
+        if (!payer && wallets.length > 0) {
+            setPayer(wallets[0].id);
+        }
+    }, [wallets, payer]);
+
+    // Ensure payment method is set if available and not set
+    useEffect(() => {
+        if (!paymentMethod && paymentMethods.length > 0) {
+            setPaymentMethod(paymentMethods[0]);
+        }
+    }, [paymentMethods, paymentMethod]);
+
     const handleSubmit = async () => {
-        if (!amount || !description) return;
+        if (!amount || !description) {
+            showToast('Por favor, preencha valor e descrição.', 'error');
+            return;
+        }
+
+        if (!payer) {
+            showToast('Selecione quem pagou a despesa.', 'error');
+            return;
+        }
 
         try {
             const taxValue = tax ? parseFloat(tax) : 0;
@@ -118,9 +140,8 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
                 setAmount('');
                 setTax('');
                 setDescription('');
-                setCategory(''); // Should rely on default or keep empty? Resetting triggers re-eval.
-                // Keep payer/method as is or reset? Usually keep last used or reset? 
-                // User said "limpar dados", implies blanking out amount/desc.
+                setCategory(categories[0]?.name || '');
+                // Don't reset payer, keep last used or default
             }
 
             onClose();
