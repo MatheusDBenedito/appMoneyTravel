@@ -75,6 +75,13 @@ const AddTransactionModal: React.FC<AddTransactionModalProps> = ({ isOpen, onClo
         }
     }, [isOpen, initialData, categories]);
 
+    // Auto-toggle shared state based on category settings for new transactions
+    useEffect(() => {
+        if (!initialData && category) {
+            setIsShared(autoSharedCategories.includes(category));
+        }
+    }, [category, autoSharedCategories, initialData]);
+
     const handleSubmit = async () => {
         if (!amount || !description) return;
 
