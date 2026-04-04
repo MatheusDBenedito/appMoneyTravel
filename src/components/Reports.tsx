@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { supabase } from '../lib/supabase';
-import { PieChart, TrendingUp, Users, Filter, Briefcase, CreditCard, Calendar } from 'lucide-react';
+import { PieChart, TrendingUp, TrendingDown, Users, Filter, Briefcase, CreditCard, Calendar, ArrowDownLeft } from 'lucide-react';
 import type { Transaction, Wallet } from '../types';
 
 export default function Reports() {
@@ -77,10 +77,18 @@ export default function Reports() {
 
     // --- Calculations (No Date Filtering - Whole Trip) ---
 
-    // 1. Total Spent
-    const totalSpent = useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
+    // 1. Totals
     const totalExpenses = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+    const totalIncome = useMemo(() => transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+    const totalNet = useMemo(() => totalExpenses - totalIncome, [totalExpenses, totalIncome]);
     const totalTax = useMemo(() => transactions.reduce((acc, t) => acc + (t.tax || 0), 0), [transactions]);
+
+    // Returns list
+    const returnTransactions = useMemo(() => {
+        return transactions
+            .filter(t => t.type === 'income')
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [transactions]);
 
     // 2. Category Breakdown
     const categoryStats = useMemo(() => {
@@ -234,17 +242,31 @@ export default function Reports() {
                                     <TrendingUp size={24} className="text-white" />
                                 </div>
                                 <div>
-                                    <p className="text-purple-100 text-sm font-medium">Total Gasto na Viagem</p>
-                                    <h2 className="text-4xl font-bold">${totalSpent.toFixed(2)}</h2>
+                                    <p className="text-purple-100 text-sm font-medium">Total Gasto (Líquido)</p>
+                                    <h2 className="text-4xl font-bold">${totalNet.toFixed(2)}</h2>
                                 </div>
                             </div>
 
-                            <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[200px]">
-                                <p className="text-purple-100 text-sm font-medium mb-1">Total em Taxas</p>
-                                <p className="text-2xl font-bold">${totalTax.toFixed(2)}</p>
-                                <p className="text-xs text-purple-200 mt-1">
-                                    {totalSpent > 0 ? ((totalTax / totalSpent) * 100).toFixed(1) : 0}% do total
-                                </p>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[150px]">
+                                    <p className="text-purple-100 text-sm font-medium mb-1 flex items-center gap-1">
+                                        <TrendingUp size={14} /> Despesas
+                                    </p>
+                                    <p className="text-2xl font-bold">${totalExpenses.toFixed(2)}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[150px]">
+                                    <p className="text-green-200 text-sm font-medium mb-1 flex items-center gap-1">
+                                        <TrendingDown size={14} /> Devoluções
+                                    </p>
+                                    <p className="text-2xl font-bold text-green-200">-${totalIncome.toFixed(2)}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm min-w-[150px]">
+                                    <p className="text-purple-100 text-sm font-medium mb-1">Taxas</p>
+                                    <p className="text-2xl font-bold">${totalTax.toFixed(2)}</p>
+                                    <p className="text-xs text-purple-200 mt-1">
+                                        {totalExpenses > 0 ? ((totalTax / totalExpenses) * 100).toFixed(1) : 0}% das despesas
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -359,7 +381,48 @@ export default function Reports() {
                             </div>
                         </div>
 
-
+                        {/* 4. Returns/Income List */}
+                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                                <ArrowDownLeft size={18} className="text-green-500" />
+                                Devoluções
+                                {returnTransactions.length > 0 && (
+                                    <span className="text-xs font-normal text-gray-400 ml-1">({returnTransactions.length})</span>
+                                )}
+                            </h3>
+                            <div className="space-y-3">
+                                {returnTransactions.map(t => {
+                                    const wallet = wallets.find(w => w.id === t.payer);
+                                    return (
+                                        <div key={t.id} className="flex items-center justify-between p-3 bg-green-50 rounded-xl border border-green-100">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-medium text-gray-800 truncate">{t.description}</p>
+                                                <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                                                    <span>{new Date(t.date).toLocaleDateString()}</span>
+                                                    <span className="text-gray-300">•</span>
+                                                    <span>{t.category}</span>
+                                                    {wallet && (
+                                                        <>
+                                                            <span className="text-gray-300">•</span>
+                                                            <span className="flex items-center gap-1">
+                                                                {wallet.avatar_url ? (
+                                                                    <img src={wallet.avatar_url} alt={wallet.name} className="w-4 h-4 rounded-full object-cover" />
+                                                                ) : (
+                                                                    <span className="w-4 h-4 rounded-full bg-green-200 flex items-center justify-center text-[8px] font-bold text-green-700">{wallet.name.charAt(0)}</span>
+                                                                )}
+                                                                {wallet.name}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <span className="font-bold text-green-600 ml-3">+${t.amount.toFixed(2)}</span>
+                                        </div>
+                                    );
+                                })}
+                                {returnTransactions.length === 0 && <p className="text-gray-400 text-center py-4">Nenhuma devolução registrada.</p>}
+                            </div>
+                        </div>
 
                     </div>
                 </>
