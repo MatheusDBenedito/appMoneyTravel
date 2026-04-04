@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useExpenses } from '../context/ExpenseContext';
 import { clsx } from 'clsx';
 import type { Transaction } from '../types';
@@ -6,11 +6,13 @@ import type { Transaction } from '../types';
 interface TransactionListProps {
     limit?: number;
     onTransactionClick?: (transaction: Transaction) => void;
+    filterPaymentMethod?: string;
+    filterPayer?: string;
 }
 
 import { getIcon } from '../utils/iconMap';
 
-const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionClick }) => {
+const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionClick, filterPaymentMethod, filterPayer }) => {
     const { transactions, wallets, categories } = useExpenses();
 
     const getCategoryIcon = (categoryName: string) => {
@@ -19,12 +21,31 @@ const TransactionList: React.FC<TransactionListProps> = ({ limit, onTransactionC
         return <IconComponent size={18} />;
     };
 
-    const displayTransactions = limit ? transactions.slice(0, limit) : transactions;
+    const filteredTransactions = useMemo(() => {
+        let result = transactions;
+        if (filterPaymentMethod) {
+            result = result.filter(t => t.paymentMethod === filterPaymentMethod);
+        }
+        if (filterPayer) {
+            result = result.filter(t => t.payer === filterPayer);
+        }
+        return result;
+    }, [transactions, filterPaymentMethod, filterPayer]);
+
+    const displayTransactions = limit ? filteredTransactions.slice(0, limit) : filteredTransactions;
 
     if (transactions.length === 0) {
         return (
             <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed">
                 <p>Nenhuma transação ainda</p>
+            </div>
+        );
+    }
+
+    if (filteredTransactions.length === 0) {
+        return (
+            <div className="text-center py-8 text-gray-400 bg-white rounded-xl border border-dashed">
+                <p>Nenhuma transação encontrada com os filtros selecionados</p>
             </div>
         );
     }

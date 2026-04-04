@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ExpenseProvider, useExpenses } from './context/ExpenseContext';
-import { Plus, ArrowRightLeft, Settings, PieChart, Wallet, Home, DollarSign } from 'lucide-react';
+import { Plus, ArrowRightLeft, Settings, PieChart, Wallet, Home, DollarSign, Filter, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CreateTripModal from './components/CreateTripModal';
 import DonutChart from './components/DonutChart';
@@ -25,13 +25,15 @@ import Login from './components/Login';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
-  const { wallets, getWalletBalance, trips, currentTripId, switchTrip } = useExpenses();
+  const { wallets, getWalletBalance, trips, currentTripId, switchTrip, paymentMethods } = useExpenses();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateTripModalOpen, setIsCreateTripModalOpen] = useState(false);
 
 
 
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [historyFilterPayment, setHistoryFilterPayment] = useState('');
+  const [historyFilterPayer, setHistoryFilterPayer] = useState('');
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'exchange' | 'settings' | 'history' | 'reports' | 'profile'>(() => {
     return (localStorage.getItem('moneytravel_active_tab') as any) || 'dashboard';
@@ -308,7 +310,7 @@ function AppContent() {
                             }}
                           ></div>
                           <span className="text-gray-600 truncate flex-1">{cat.name}</span>
-                          <span className="font-bold text-gray-800">{Math.round((cat.value / (totalBalance > 0 ? totalBalance : 1)) * 100)}%</span>
+                          <span className="font-bold text-gray-800">{Math.round(cat.percentage)}%</span>
                         </div>
                       ))}
                     </div>
@@ -357,10 +359,57 @@ function AppContent() {
 
           {activeTab === 'history' && (
             <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 min-h-[500px]">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-lg">Histórico Completo</h3>
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-lg">Histórico Completo</h3>
+                  {(historyFilterPayment || historyFilterPayer) && (
+                    <button
+                      onClick={() => { setHistoryFilterPayment(''); setHistoryFilterPayer(''); }}
+                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-500 transition-colors bg-gray-100 hover:bg-red-50 px-3 py-1.5 rounded-full"
+                    >
+                      <X size={12} />
+                      Limpar filtros
+                    </button>
+                  )}
+                </div>
+
+                {/* Filters Row */}
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 min-w-[180px]">
+                    <Filter size={14} className="text-gray-400 flex-shrink-0" />
+                    <select
+                      value={historyFilterPayment}
+                      onChange={(e) => setHistoryFilterPayment(e.target.value)}
+                      className="bg-transparent text-sm text-gray-700 focus:outline-none cursor-pointer w-full"
+                    >
+                      <option value="">Todas as formas de pgto.</option>
+                      {paymentMethods.map(pm => (
+                        <option key={pm} value={pm}>{pm}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 min-w-[180px]">
+                    <Wallet size={14} className="text-gray-400 flex-shrink-0" />
+                    <select
+                      value={historyFilterPayer}
+                      onChange={(e) => setHistoryFilterPayer(e.target.value)}
+                      className="bg-transparent text-sm text-gray-700 focus:outline-none cursor-pointer w-full"
+                    >
+                      <option value="">Todas as pessoas</option>
+                      {wallets.map(w => (
+                        <option key={w.id} value={w.id}>{w.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
-              <TransactionList onTransactionClick={handleOpenModal} />
+
+              <TransactionList
+                onTransactionClick={handleOpenModal}
+                filterPaymentMethod={historyFilterPayment || undefined}
+                filterPayer={historyFilterPayer || undefined}
+              />
             </section>
           )}
         </main>

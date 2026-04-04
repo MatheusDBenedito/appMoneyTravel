@@ -79,6 +79,7 @@ export default function Reports() {
 
     // 1. Total Spent
     const totalSpent = useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
+    const totalExpenses = useMemo(() => transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0), [transactions]);
     const totalTax = useMemo(() => transactions.reduce((acc, t) => acc + (t.tax || 0), 0), [transactions]);
 
     // 2. Category Breakdown
@@ -92,20 +93,20 @@ export default function Reports() {
             }
         });
 
-        // Filter out categories with 0 or negative total (optional, but usually desired for "Spending" charts)
-        // If the user wants to see "Negative Spending" (Profit), we can keep them. 
-        // For a donut chart, negative values usually break it or are confusing. 
-        // Let's keep them but ensure the chart handles them (or just filter out for now if value <= 0).
+        const filteredEntries = Object.entries(stats)
+            .filter(([, value]) => value > 0);
 
-        return Object.entries(stats)
-            .filter(([, value]) => value > 0) // Only show positive spending
+        // Use the sum of filtered category values so percentages add up to 100%
+        const filteredTotal = filteredEntries.reduce((a, [, b]) => a + b, 0);
+
+        return filteredEntries
             .sort(([, a], [, b]) => b - a)
             .map(([name, value]) => ({
                 name,
                 value,
-                percentage: totalSpent > 0 ? (value / totalSpent) * 100 : 0
+                percentage: filteredTotal > 0 ? (value / filteredTotal) * 100 : 0
             }));
-    }, [transactions, totalSpent]);
+    }, [transactions]);
 
     // 3. Person Breakdown (Consumption / Cost)
     const consumptionStats = useMemo(() => {
@@ -137,9 +138,9 @@ export default function Reports() {
                 id,
                 name: wallets.find(w => w.id === id)?.name || 'Desconhecido',
                 value,
-                percentage: totalSpent > 0 ? (value / totalSpent) * 100 : 0
+                percentage: totalExpenses > 0 ? (value / totalExpenses) * 100 : 0
             }));
-    }, [transactions, wallets, totalSpent]);
+    }, [transactions, wallets, totalExpenses]);
 
 
 
@@ -157,9 +158,9 @@ export default function Reports() {
             .map(([name, value]) => ({
                 name,
                 value,
-                percentage: totalSpent > 0 ? (value / totalSpent) * 100 : 0
+                percentage: totalExpenses > 0 ? (value / totalExpenses) * 100 : 0
             }));
-    }, [transactions, totalSpent]);
+    }, [transactions, totalExpenses]);
 
     // 6. Daily Breakdown
     const dailyStats = useMemo(() => {
